@@ -1,17 +1,20 @@
+
 services:
-  shop_app:
+  app:
     build: .
+    container_name: my_go_app
     restart: always
     ports:
       - "8070:8070"
     env_file:
       - .env
     depends_on:
-      - shop_postgres
-      - shop_redis
+      - postgres
+      - redis
 
-  shop_postgres:
+  postgres:
     image: postgres:15
+    container_name: my_postgres
     restart: always
     ports:
       - "5432:5432"
@@ -22,13 +25,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  shop_redis:
+  redis:
     image: redis:7
+    container_name: my_redis
     restart: always
     ports:
       - "6379:6379"
 
-  shop_pgadmin:
+  pgadmin:
     image: adminer
     restart: always
     ports:
