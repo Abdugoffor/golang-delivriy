@@ -1,0 +1,1 @@
+package product_arrival_cmd

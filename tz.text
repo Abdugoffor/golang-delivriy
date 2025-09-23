@@ -1,0 +1,22 @@
+category,
+product,
+product-prixod
+reklama,
+product view, 
+product like or dislike,
+product yoqimli
+product comment
+savatcha
+order , manzil location tel,
+order delevriy,
+mail notifay
+
+multi lang,
+user role
+    - user
+    - mod
+    - order
+    - kuryer
+    - admin
+
+log, history 
