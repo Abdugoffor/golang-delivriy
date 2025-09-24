@@ -27,8 +27,8 @@ func CategorySeeder() {
 		var exists category_model.Category
 		if err := config.DB.Where("slug = ?", c.Slug).First(&exists).Error; err == gorm.ErrRecordNotFound {
 			c.IsActive = true
-			c.CreatedAt = time.Now().Unix()
-			c.UpdatedAt = time.Now().Unix()
+			c.CreatedAt = time.Now()
+			c.UpdatedAt = time.Now()
 
 			if err := config.DB.Create(&c).Error; err != nil {
 				log.Printf("❌ CategorySeeder insert error: %v", err)

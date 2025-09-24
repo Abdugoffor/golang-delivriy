@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -43,4 +44,16 @@ func Slug(data string) string {
 	reg = regexp.MustCompile(`\-{2,}`)
 	data = reg.ReplaceAllString(data, "-")
 	return data
+}
+
+func FormatDateOnly(date time.Time) string {
+	return date.Format("02-01-2006")
+}
+
+func FormatTime(date time.Time) string {
+	return date.Format("15:04:05")
+}
+
+func FormatDate(date time.Time) string {
+	return date.Format("02-01-2006 15:04:05")
 }

@@ -41,7 +41,7 @@ func ProductArrivalSeeder() {
 			ProductID: product.ID,
 			Count:     count,
 			Sum:       sum,
-			CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
+			CreatedAt: time.Now(),
 		}
 		if err := config.DB.Create(&arrival).Error; err != nil {
 			log.Printf("❌ ProductArrival error: %v", err)

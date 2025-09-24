@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
 	"my-project/config"
 	"my-project/helper"
+	category_cmd "my-project/modul/category"
 	"my-project/seeder"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,9 +19,7 @@ func main() {
 
 	route := echo.New()
 
-	route.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Salom, Echo ishlayapti 🚀")
-	})
+	category_cmd.Cmd(route, config.DB, log.Default())
 
 	route.Logger.Fatal(route.Start(":" + helper.ENV("HTTP_PORT")))
 
