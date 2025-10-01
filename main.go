@@ -17,9 +17,12 @@ func main() {
 	config.DBConnect()
 
 	seeder.DBSeed()
-	
+
+	// history.RegisterHooks(config.DBConnect())
 
 	route := echo.New()
+
+	// route.Use(history.RequestContext)
 
 	category_cmd.Cmd(route, config.DB, log.Default())
 	product_cmd.Cmd(route, config.DB, log.Default())

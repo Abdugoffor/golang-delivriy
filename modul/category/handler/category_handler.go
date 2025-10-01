@@ -1,13 +1,18 @@
 package category_handler
 
 import (
+	"fmt"
 	"log"
 	category_dto "my-project/modul/category/dto"
 	category_service "my-project/modul/category/service"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/nguyenthenguyen/docx"
 	"gorm.io/gorm"
 )
 
@@ -51,26 +56,57 @@ func (handler *categoryHandler) All(ctx echo.Context) error {
 }
 
 func (handler *categoryHandler) Show(ctx echo.Context) error {
-
+	// 1. URL param olish
 	idParam := ctx.Param("id")
 
 	parsedID, err := strconv.ParseUint(idParam, 10, 64)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
-		}
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
 	}
-
 	id := uint(parsedID)
 
+	// 2. Serviceden ma'lumot olish
 	data, err := handler.service.Show(ctx, id)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
-		}
+	if err != nil {
+		handler.log.Println("service error:", err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "database error"})
 	}
 
-	return ctx.JSON(http.StatusOK, data)
+	// 3. Executable pathni olish (aniq project rootni topish uchun)
+	exe, _ := os.Executable()
+	exePath := filepath.Dir(exe)
+
+	// 4. Template fayl yo‘lini yasash
+	templatePath := filepath.Join(exePath, "templates", "template2.docx")
+	handler.log.Println("Template path:", templatePath)
+
+	// 5. DOCX faylni ochish
+	r, err := docx.ReadDocxFile(templatePath)
+	if err != nil {
+		handler.log.Println("template open error:", err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "template file not found"})
+	}
+	defer r.Close()
+
+	// 6. Editable doc olish
+	docx1 := r.Editable()
+
+	// 7. Placeholderlarni almashtirish
+	docx1.Replace("{{name}}", data.Name, -1)
+	docx1.Replace("{{surname}}", data.Slug, -1)
+	docx1.Replace("{{date}}", time.Now().Format("2006-01-02"), -1)
+
+	// 8. Output faylni vaqt asosida nomlash
+	outputFile := filepath.Join(exePath, fmt.Sprintf("generated_%d.docx", time.Now().UnixNano()))
+
+	// 9. DOCX faylni yozish
+	if err := docx1.WriteToFile(outputFile); err != nil {
+		handler.log.Println("write error:", err)
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": "failed to write file"})
+	}
+
+	// 10. Foydalanuvchiga faylni yuklab berish
+	return ctx.Attachment(outputFile, "category.docx")
 }
 
 func (handler *categoryHandler) Trash(ctx echo.Context) error {
