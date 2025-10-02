@@ -104,7 +104,7 @@ func (service *categoryService) Create(ctx echo.Context, req category_dto.Create
 		model.Order = req.Order
 		model.IsActive = req.IsActive
 
-		if err := service.db.Create(&model).Error; err != nil {
+		if err := service.db.WithContext(ctx.Request().Context()).Create(&model).Error; err != nil {
 			return category_dto.Response{}, err
 		}
 	}
@@ -126,7 +126,7 @@ func (service *categoryService) Update(ctx echo.Context, id uint, req category_d
 	model.Order = req.Order
 	model.IsActive = req.IsActive
 
-	if err := service.db.Save(&model).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Save(&model).Error; err != nil {
 		return category_dto.Response{}, err
 	}
 
@@ -143,7 +143,7 @@ func (service *categoryService) Delete(ctx echo.Context, id uint) error {
 		}
 	}
 
-	if err := service.db.Delete(&model).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Delete(&model).Error; err != nil {
 		return err
 	}
 
@@ -158,7 +158,7 @@ func (service *categoryService) ForceDelete(ctx echo.Context, id uint) error {
 		}
 	}
 
-	if err := service.db.Unscoped().Delete(&model).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Unscoped().Delete(&model).Error; err != nil {
 		return err
 	}
 
@@ -173,7 +173,7 @@ func (service *categoryService) Restore(ctx echo.Context, id uint) (category_dto
 		}
 	}
 
-	if err := service.db.Model(&model).Update("deleted_at", nil).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Model(&model).Update("deleted_at", nil).Error; err != nil {
 		return category_dto.Response{}, err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"log"
 	"my-project/config"
 	"my-project/helper"
+	middleware "my-project/middlewares"
 	category_cmd "my-project/modul/category"
 	product_cmd "my-project/modul/product"
 	"my-project/seeder"
@@ -18,11 +19,11 @@ func main() {
 
 	seeder.DBSeed()
 
-	// history.RegisterHooks(config.DBConnect())
-
 	route := echo.New()
 
-	// route.Use(history.RequestContext)
+	route.Use(middleware.HistoryMiddleware())
+
+	helper.RegisterHistoryCallbacks(config.DBConnect(), route)
 
 	category_cmd.Cmd(route, config.DB, log.Default())
 	product_cmd.Cmd(route, config.DB, log.Default())
