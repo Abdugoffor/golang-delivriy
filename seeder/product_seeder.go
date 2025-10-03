@@ -1,6 +1,7 @@
 package seeder
 
 import (
+	"context"
 	"log"
 	"math/rand"
 	config "my-project/config"
@@ -35,6 +36,8 @@ var productNames = []string{
 }
 
 func ProductSeeder() {
+	ctx := context.Background()
+
 	for i, name := range productNames {
 		slug := helper.Slug(name)
 
@@ -50,7 +53,7 @@ func ProductSeeder() {
 				UpdatedAt:  time.Now(),
 			}
 
-			if err := config.DB.Create(&product).Error; err != nil {
+			if err := config.DB.WithContext(ctx).Create(&product).Error; err != nil {
 				log.Printf("❌ ProductSeeder insert error: %v", err)
 			} else {
 				log.Printf("✅ (%d) Product qo‘shildi: %s", i+1, product.Name)

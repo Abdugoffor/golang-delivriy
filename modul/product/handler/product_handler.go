@@ -2,6 +2,7 @@ package product_handler
 
 import (
 	"log"
+	middleware "my-project/middlewares"
 	product_dto "my-project/modul/product/dto"
 	product_service "my-project/modul/product/service"
 	"net/http"
@@ -23,7 +24,7 @@ func NewProductHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *productH
 		log:     log,
 		service: product_service.NewProductService(db),
 	}
-	routes := gorm.Group("/product")
+	routes := gorm.Group("/product", middleware.AuthMiddleware())
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)

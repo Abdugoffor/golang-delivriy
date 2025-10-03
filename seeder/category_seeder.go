@@ -1,6 +1,7 @@
 package seeder
 
 import (
+	"context"
 	"log"
 	config "my-project/config"
 	category_model "my-project/modul/category/model"
@@ -10,6 +11,8 @@ import (
 )
 
 func CategorySeeder() {
+	ctx := context.Background()
+
 	categories := []category_model.Category{
 		{Name: "Elektronika", Slug: "elektronika", Order: 1},
 		{Name: "Maishiy texnika", Slug: "maishiy-texnika", Order: 2},
@@ -30,7 +33,7 @@ func CategorySeeder() {
 			c.CreatedAt = time.Now()
 			c.UpdatedAt = time.Now()
 
-			if err := config.DB.Create(&c).Error; err != nil {
+			if err := config.DB.WithContext(ctx).Create(&c).Error; err != nil {
 				log.Printf("❌ CategorySeeder insert error: %v", err)
 			} else {
 				log.Printf("✅ Category '%s' qo‘shildi", c.Name)
