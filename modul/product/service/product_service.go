@@ -164,7 +164,7 @@ func (service *productService) ForceDelete(ctx echo.Context, id uint) error {
 		}
 	}
 
-	if err := service.db.Unscoped().WithContext(ctx.Request().Context()).Delete(&model).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Unscoped().Delete(&model).Error; err != nil {
 		return err
 	}
 
@@ -179,7 +179,7 @@ func (service *productService) Restore(ctx echo.Context, id uint) (product_dto.R
 		}
 	}
 
-	if err := service.db.Model(&model).WithContext(ctx.Request().Context()).Update("deleted_at", nil).Error; err != nil {
+	if err := service.db.WithContext(ctx.Request().Context()).Unscoped().Model(&model).Update("deleted_at", nil).Error; err != nil {
 		return product_dto.Response{}, err
 	}
 
