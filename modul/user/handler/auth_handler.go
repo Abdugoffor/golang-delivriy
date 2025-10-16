@@ -24,17 +24,18 @@ func NewAuthHandler(g *echo.Group, db *gorm.DB, log *log.Logger) *AuthHandler {
 		service: auth_service.NewAuthService(db),
 	}
 
-	r := g.Group("/auth")
+	routes := g.Group("/auth")
 	{
-		r.POST("/register", h.Register)
-		r.GET("/verify", h.VerifyEmail)
-		r.POST("/login", h.Login)
-		r.POST("/logout", h.Logout)
-		r.GET("/me", h.Profile, middleware.AuthMiddleware())
-		r.PUT("/me", h.UpdateProfile, middleware.AuthMiddleware())
-		r.POST("/password-reset/request", h.RequestPasswordReset)
-		r.POST("/password-reset", h.ResetPassword)
+		routes.POST("/register", h.Register)
+		routes.GET("/verify", h.VerifyEmail)
+		routes.POST("/login", h.Login)
+		routes.POST("/logout", h.Logout)
+		routes.GET("/me", h.Profile, middleware.AuthMiddleware())
+		routes.PUT("/me", h.UpdateProfile, middleware.AuthMiddleware())
+		routes.POST("/password-reset/request", h.RequestPasswordReset)
+		routes.POST("/password-reset", h.ResetPassword)
 	}
+
 	return h
 }
 

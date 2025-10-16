@@ -8,17 +8,20 @@ import (
 )
 
 func RunMigrations() {
-	err := DB.AutoMigrate(
-		&user_model.User{},
-		&category_model.Category{},
-		&product_model.Product{},
-	)
+	models := []interface{}{
+		user_model.User{},
+		category_model.Category{},
+		product_model.Product{},
+	}
 
-	if err != nil {
-		log.Fatal("❌ Failed to run migrations: ", err)
+	err := DB.AutoMigrate(models...)
+	{
+		if err != nil {
+			log.Fatal("❌ Failed to run migrations: ", err)
+		}
 	}
 
 	log.Println("✅ Migrations completed")
 
-	CreateHistoryTriggers([]string{"categories", "products", "users"})
+	CreateHistoryTriggers(DB, models)
 }

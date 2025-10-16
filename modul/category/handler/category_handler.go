@@ -2,7 +2,6 @@ package category_handler
 
 import (
 	"log"
-	middleware "my-project/middlewares"
 	category_dto "my-project/modul/category/dto"
 	category_service "my-project/modul/category/service"
 	"net/http"
@@ -24,7 +23,7 @@ func NewCategoryHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *categor
 		log:     log,
 		service: category_service.NewCategoryService(db),
 	}
-	routes := gorm.Group("/category", middleware.AuthMiddleware())
+	routes := gorm.Group("/category")
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)
