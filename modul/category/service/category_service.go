@@ -123,7 +123,9 @@ func (service *categoryService) Update(ctx echo.Context, id uint, req category_d
 	}
 
 	model.Name = req.Name
+
 	model.Order = req.Order
+
 	model.IsActive = req.IsActive
 
 	if err := service.db.WithContext(ctx.Request().Context()).Save(&model).Error; err != nil {
