@@ -108,9 +108,8 @@ func (service *productService) Create(ctx echo.Context, req product_dto.Create) 
 		model.Name = req.Name
 		model.Slug = helper.Slug(req.Name)
 		model.Price = req.Price
-		model.CategoryId = req.CategoryID
 
-		if err := service.db.WithContext(ctx.Request().Context()).Create(&model).Error; err != nil {
+		if err := service.db.Create(&model).Error; err != nil {
 			return product_dto.Response{}, err
 		}
 	}
@@ -130,9 +129,8 @@ func (service *productService) Update(ctx echo.Context, id uint, req product_dto
 
 	model.Name = req.Name
 	model.Price = req.Price
-	model.CategoryId = req.CategoryID
 
-	if err := service.db.WithContext(ctx.Request().Context()).Save(&model).Error; err != nil {
+	if err := service.db.Save(&model).Error; err != nil {
 		return product_dto.Response{}, err
 	}
 
@@ -149,7 +147,7 @@ func (service *productService) Delete(ctx echo.Context, id uint) error {
 		}
 	}
 
-	if err := service.db.WithContext(ctx.Request().Context()).Delete(&model).Error; err != nil {
+	if err := service.db.Delete(&model).Error; err != nil {
 		return err
 	}
 

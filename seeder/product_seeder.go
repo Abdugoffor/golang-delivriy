@@ -41,13 +41,12 @@ func ProductSeeder() {
 		var exists product_model.Product
 		if err := config.DB.Where("slug = ?", slug).First(&exists).Error; err == gorm.ErrRecordNotFound {
 			product := product_model.Product{
-				Name:       name,
-				Slug:       slug,
-				Price:      rand.Intn(5000) + 100,   // 100 dan 5100 gacha random narx
-				CategoryId: uint(rand.Intn(10) + 1), // 1–10 category orasida
-				IsActive:   true,
-				CreatedAt:  time.Now(),
-				UpdatedAt:  time.Now(),
+				Name:      name,
+				Slug:      slug,
+				Price:     rand.Intn(5000) + 100, // 100 dan 5100 gacha random narx
+				IsActive:  true,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			}
 
 			if err := config.DB.Create(&product).Error; err != nil {
