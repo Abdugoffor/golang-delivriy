@@ -1,0 +1,55 @@
+{{ define "content" }}
+<div class="card-body">
+    <h1>Product List</h1>
+    <form class="d-flex" method="GET">
+        <input type="text" name="name" class="form-control me-2" placeholder="Search name..."
+            value="{{ .Filter.Name }}">
+        <input type="number" name="price" class="form-control me-2" placeholder="Price" value="{{ .Filter.Price }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <table class="table table-bordered table-hover align-middle mt-5">
+        <thead class="table-dark">
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th style="width: 150px;">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $index, $p := .models }}
+            <tr>
+                <td>{{ add $index 1 }}</td>
+                <td>{{ $p.ID }}</td>
+                <td>{{ $p.Name }}</td>
+                <td>${{ $p.Price }}</td>
+            </tr>
+            {{ else }}
+            <tr>
+                <td colspan="4" class="text-center">No products found</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+
+    {{ if gt .Meta.LastPage 1 }}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {{ range $i := seq 1 .Meta.LastPage .Meta.CurrentPage }}
+            {{ if eq $i -1 }}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {{ else }}
+            <li class="page-item {{ if eq $.Meta.CurrentPage $i }}active{{ end }}">
+                <a class="page-link"
+                    href="/api/v1/admin/product?page={{ $i }}&name={{ $.Filter.Name }}&price={{ $.Filter.Price }}">
+                    {{ $i }}
+                </a>
+            </li>
+            {{ end }}
+            {{ end }}
+        </ul>
+    </nav>
+    {{ end }}
+</div>
+{{ end }}

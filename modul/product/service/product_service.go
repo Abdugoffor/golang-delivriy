@@ -10,7 +10,7 @@ import (
 )
 
 type ProductService interface {
-	All(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error)
+	All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
 	Show(ctx echo.Context, id uint) (product_dto.Response, error)
 	Trash(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error)
 	ShowTrash(ctx echo.Context, id uint) (product_dto.Response, error)
@@ -29,10 +29,10 @@ func NewProductService(db *gorm.DB) ProductService {
 	return &productService{db: db}
 }
 
-func (service *productService) All(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error) {
+func (service *productService) All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error) {
 	var models []product_model.Product
 
-	res, err := helper.Paginate(ctx, service.db, &models, 10)
+	res, err := helper.Paginate(ctx, service.db.Scopes(filter), &models, 10)
 	{
 		if err != nil {
 			return helper.PaginatedResponse[product_dto.Response]{}, err

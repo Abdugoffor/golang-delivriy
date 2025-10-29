@@ -18,6 +18,7 @@ func main() {
 	seeder.DBSeed()
 
 	route := echo.New()
+
 	product_cmd.Cmd(route, config.DB, log.Default())
 
 	route.Logger.Fatal(route.Start(":" + helper.ENV("HTTP_PORT")))

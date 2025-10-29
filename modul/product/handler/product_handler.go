@@ -2,6 +2,7 @@ package product_handler
 
 import (
 	"log"
+	"my-project/helper"
 	product_dto "my-project/modul/product/dto"
 	product_service "my-project/modul/product/service"
 	"net/http"
@@ -39,14 +40,40 @@ func NewProductHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *productH
 }
 
 func (handler *productHandler) All(ctx echo.Context) error {
-	data, err := handler.service.All(ctx)
+	var query product_dto.Filter
+	{
+		if err := ctx.Bind(&query); err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+		}
+	}
+
+	filter := func(tx *gorm.DB) *gorm.DB {
+		if query.Name != "" {
+			tx = tx.Where("name LIKE ?", "%"+query.Name+"%")
+		}
+
+		if query.Price != 0 {
+			tx = tx.Where("price = ?", query.Price)
+		}
+
+		return tx
+	}
+
+	data, err := handler.service.All(ctx, filter)
 	{
 		if err != nil {
 			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 		}
 	}
 
-	return ctx.JSON(http.StatusOK, data)
+	viewData := map[string]interface{}{
+		"models": data.Data,
+		"Meta":   data.Meta,
+		"Filter": query,
+	}
+
+	return helper.RenderTemplate(ctx, "layout.html", "product/index.html", viewData)
+
 }
 
 func (handler *productHandler) Show(ctx echo.Context) error {

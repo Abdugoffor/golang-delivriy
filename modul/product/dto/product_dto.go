@@ -6,15 +6,17 @@ import (
 )
 
 type Create struct {
-	Name       string `json:"name"`
-	Price      int    `json:"price"`
-	CategoryID uint   `json:"category_id"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
 }
 
 type Update struct {
-	Name       string `json:"name"`
-	Price      int    `json:"price"`
-	CategoryID uint   `json:"category_id"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
+}
+type Filter struct {
+	Name  string `json:"name" query:"name" form:"name"`
+	Price int    `json:"price" query:"price" form:"price"`
 }
 
 type Response struct {
