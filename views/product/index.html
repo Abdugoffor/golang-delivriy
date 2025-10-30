@@ -1,0 +1,75 @@
+{{ define "content" }}
+<div class="card-body">
+    <h1>Product List</h1>
+
+    <form class="d-flex mb-4" method="GET">
+        <input type="text" name="name" class="form-control me-2" placeholder="Search name..."
+            value="{{ .Filter.Name }}">
+        <input type="number" name="price" class="form-control me-2" placeholder="Price" value="{{ .Filter.Price }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th style="width: 150px;">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $index, $p := .models }}
+            <tr>
+                <td>{{ add $index 1 }}</td>
+                <td>{{ $p.ID }}</td>
+                <td>{{ $p.Name }}</td>
+                <td>${{ $p.Price }}</td>
+            </tr>
+            {{ else }}
+            <tr>
+                <td colspan="4" class="text-center">No products found</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+
+    {{ if gt .Meta.LastPage 1 }}
+    <nav>
+        <ul class="pagination justify-content-center">
+            <!-- Previous Button -->
+            {{ if gt .Meta.CurrentPage 1 }}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?page={{ sub .Meta.CurrentPage 1 }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}">Previous</a>
+            </li>
+            {{ else }}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {{ end }}
+            <!-- Page Numbers -->
+            {{ range $i := seq 1 .Meta.LastPage .Meta.CurrentPage }}
+                {{ if eq $i -1 }}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {{ else }}
+                <li class="page-item {{ if eq $.Meta.CurrentPage $i }}active{{ end }}">
+                    <a class="page-link" href="?page={{ $i }}&name={{ $.Filter.Name }}&price={{ $.Filter.Price }}">
+                        {{ $i }}
+                    </a>
+                </li>
+                {{ end }}
+            {{ end }}
+
+            <!-- Next Button -->
+            {{ if lt .Meta.CurrentPage .Meta.LastPage }}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?page={{ add .Meta.CurrentPage 1 }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}">Next</a>
+            </li>
+            {{ else }}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {{ end }}
+        </ul>
+    </nav>
+    {{ end }}
+</div>
+{{ end }}

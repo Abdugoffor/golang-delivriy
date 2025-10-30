@@ -1,13 +1,16 @@
 package helper
 
 import (
+	"html/template"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo/v4"
 )
 
 func LoadEnv() {
@@ -56,4 +59,54 @@ func FormatTime(date time.Time) string {
 
 func FormatDate(date time.Time) string {
 	return date.Format("02-01-2006 15:04:05")
+}
+
+var templateFuncs = template.FuncMap{
+	"add": func(a, b int) int {
+		return a + b
+	},
+	"sub": func(a, b int) int {
+		return a - b
+	},
+	"seq": func(start, end int, current int) []int {
+		var pages []int
+		window := 2
+
+		if start < 1 {
+			start = 1
+		}
+
+		if current-window > start {
+			pages = append(pages, 1)
+			if current-window > 2 {
+				pages = append(pages, -1)
+			}
+		}
+
+		for i := current - window; i <= current+window; i++ {
+			if i >= 1 && i <= end {
+				pages = append(pages, i)
+			}
+		}
+
+		if current+window < end {
+			if current+window < end-1 {
+				pages = append(pages, -1)
+			}
+			pages = append(pages, end)
+		}
+
+		return pages
+	},
+}
+
+func View(ctx echo.Context, layoutName, viewName string, data interface{}) error {
+	tmpl, err := template.New("layout").
+		Funcs(templateFuncs).
+		ParseFiles("views/"+layoutName, "views/"+viewName)
+	if err != nil {
+		return ctx.String(http.StatusInternalServerError, "Template parsing error: "+err.Error())
+	}
+
+	return tmpl.ExecuteTemplate(ctx.Response().Writer, "layout", data)
 }

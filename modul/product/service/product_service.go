@@ -10,7 +10,7 @@ import (
 )
 
 type ProductService interface {
-	All(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error)
+	All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
 	Show(ctx echo.Context, id uint) (product_dto.Response, error)
 	Trash(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error)
 	ShowTrash(ctx echo.Context, id uint) (product_dto.Response, error)
@@ -29,10 +29,10 @@ func NewProductService(db *gorm.DB) ProductService {
 	return &productService{db: db}
 }
 
-func (service *productService) All(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error) {
+func (service *productService) All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error) {
 	var models []product_model.Product
 
-	res, err := helper.Paginate(ctx, service.db, &models, 10)
+	res, err := helper.Paginate(ctx, service.db.Scopes(filter), &models, 10)
 	{
 		if err != nil {
 			return helper.PaginatedResponse[product_dto.Response]{}, err
@@ -108,9 +108,8 @@ func (service *productService) Create(ctx echo.Context, req product_dto.Create) 
 		model.Name = req.Name
 		model.Slug = helper.Slug(req.Name)
 		model.Price = req.Price
-		model.CategoryId = req.CategoryID
 
-		if err := service.db.WithContext(ctx.Request().Context()).Create(&model).Error; err != nil {
+		if err := service.db.Create(&model).Error; err != nil {
 			return product_dto.Response{}, err
 		}
 	}
@@ -130,9 +129,8 @@ func (service *productService) Update(ctx echo.Context, id uint, req product_dto
 
 	model.Name = req.Name
 	model.Price = req.Price
-	model.CategoryId = req.CategoryID
 
-	if err := service.db.WithContext(ctx.Request().Context()).Save(&model).Error; err != nil {
+	if err := service.db.Save(&model).Error; err != nil {
 		return product_dto.Response{}, err
 	}
 
@@ -149,7 +147,7 @@ func (service *productService) Delete(ctx echo.Context, id uint) error {
 		}
 	}
 
-	if err := service.db.WithContext(ctx.Request().Context()).Delete(&model).Error; err != nil {
+	if err := service.db.Delete(&model).Error; err != nil {
 		return err
 	}
 
