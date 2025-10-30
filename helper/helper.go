@@ -61,12 +61,16 @@ func FormatDate(date time.Time) string {
 	return date.Format("02-01-2006 15:04:05")
 }
 
-// Template funksiyalar
 var templateFuncs = template.FuncMap{
-	// pagination sequence
+	"add": func(a, b int) int {
+		return a + b
+	},
+	"sub": func(a, b int) int {
+		return a - b
+	},
 	"seq": func(start, end int, current int) []int {
 		var pages []int
-		window := 3
+		window := 2
 
 		if start < 1 {
 			start = 1
@@ -74,8 +78,8 @@ var templateFuncs = template.FuncMap{
 
 		if current-window > start {
 			pages = append(pages, 1)
-			if current-window > 3 {
-				pages = append(pages, -1) // ...
+			if current-window > 2 {
+				pages = append(pages, -1)
 			}
 		}
 
@@ -87,23 +91,18 @@ var templateFuncs = template.FuncMap{
 
 		if current+window < end {
 			if current+window < end-1 {
-				pages = append(pages, -1) // ...
+				pages = append(pages, -1)
 			}
 			pages = append(pages, end)
 		}
 
 		return pages
 	},
-	// add funksiyasi
-	"add": func(a, b int) int {
-		return a + b
-	},
 }
 
-// RenderTemplate — layout bilan HTML sahifani render qiladi
-func RenderTemplate(ctx echo.Context, layoutName, viewName string, data interface{}) error {
+func View(ctx echo.Context, layoutName, viewName string, data interface{}) error {
 	tmpl, err := template.New("layout").
-		Funcs(templateFuncs). // << shu yerda ulanadi
+		Funcs(templateFuncs).
 		ParseFiles("views/"+layoutName, "views/"+viewName)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, "Template parsing error: "+err.Error())

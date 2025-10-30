@@ -72,7 +72,7 @@ func (handler *productHandler) All(ctx echo.Context) error {
 		"Filter": query,
 	}
 
-	return helper.RenderTemplate(ctx, "layout.html", "product/index.html", viewData)
+	return helper.View(ctx, "layout.html", "product/index.html", viewData)
 
 }
 
