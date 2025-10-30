@@ -51,7 +51,7 @@ func ProductSeeder() {
 		product := product_model.Product{
 			Name:      name,
 			Slug:      slug,
-			Price:     rand.Intn(5000) + 100, // 100 dan 5100 gacha random narx
+			Price:     rand.Int63n(5000), // 100 dan 5100 gacha random narx
 			IsActive:  true,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),

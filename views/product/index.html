@@ -1,75 +1,123 @@
 {{ define "content" }}
-<div class="card-body">
-    <h1>Product List</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
 
-    <form class="d-flex mb-4" method="GET">
-        <input type="text" name="name" class="form-control me-2" placeholder="Search name..."
-            value="{{ .Filter.Name }}">
-        <input type="number" name="price" class="form-control me-2" placeholder="Price" value="{{ .Filter.Price }}">
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+            <h1 class="h4 mb-3 mb-md-0">
+                <i class="ph ph-package text-primary"></i> Product List
+            </h1>
+            <a href="/api/v1/admin/product/create" class="btn btn-primary d-flex align-items-center gap-2">
+                <i class="ph ph-plus-circle"></i> Create
+            </a>
+        </div>
 
-    <table class="table table-bordered table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th style="width: 50px;">#</th>
-                <th>ID</th>
-                <th>Name</th>
-                <th style="width: 150px;">Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{ range $index, $p := .models }}
-            <tr>
-                <td>{{ add $index 1 }}</td>
-                <td>{{ $p.ID }}</td>
-                <td>{{ $p.Name }}</td>
-                <td>${{ $p.Price }}</td>
-            </tr>
-            {{ else }}
-            <tr>
-                <td colspan="4" class="text-center">No products found</td>
-            </tr>
-            {{ end }}
-        </tbody>
-    </table>
+        <!-- Search form -->
+        <form method="GET" class="row g-2 mb-4">
+            <div class="col-md">
+                <input type="text" name="name" placeholder="Search name..." value="{{ .Filter.Name }}"
+                    class="form-control">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="price" placeholder="Price" value="{{ .Filter.Price }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-control">
+                    <option value="" {{ if eq .Filter.Status "" }}selected{{ end }}>ALL</option>
+                    <option value="open" {{ if eq .Filter.Status "open" }}selected{{ end }}>OPEN</option>
+                    <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>DELETED</option>
+                </select>
+            </div>
 
-    {{ if gt .Meta.LastPage 1 }}
-    <nav>
-        <ul class="pagination justify-content-center">
-            <!-- Previous Button -->
-            {{ if gt .Meta.CurrentPage 1 }}
-            <li class="page-item">
-                <a class="page-link"
-                    href="?page={{ sub .Meta.CurrentPage 1 }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}">Previous</a>
-            </li>
-            {{ else }}
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {{ end }}
-            <!-- Page Numbers -->
-            {{ range $i := seq 1 .Meta.LastPage .Meta.CurrentPage }}
-                {{ if eq $i -1 }}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-                {{ else }}
-                <li class="page-item {{ if eq $.Meta.CurrentPage $i }}active{{ end }}">
-                    <a class="page-link" href="?page={{ $i }}&name={{ $.Filter.Name }}&price={{ $.Filter.Price }}">
-                        {{ $i }}
-                    </a>
-                </li>
-                {{ end }}
-            {{ end }}
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-secondary d-flex align-items-center gap-1">
+                    <i class="ph ph-magnifying-glass"></i> Search
+                </button>
+            </div>
+        </form>
 
-            <!-- Next Button -->
-            {{ if lt .Meta.CurrentPage .Meta.LastPage }}
-            <li class="page-item">
-                <a class="page-link"
-                    href="?page={{ add .Meta.CurrentPage 1 }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}">Next</a>
-            </li>
-            {{ else }}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
-            {{ end }}
-        </ul>
-    </nav>
-    {{ end }}
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light text-uppercase small">
+                    <tr>
+                        <th>#</th>
+                        <th>
+                            <a href="?column=id&sort={{ if eq .Filter.Column " id" }}{{ if eq .Filter.Sort "asc"
+                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
+                                ID
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?column=name&sort={{ if eq .Filter.Column " name" }}{{ if eq .Filter.Sort "asc"
+                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
+                                Name
+                            </a>
+                        </th>
+                        <th>
+                            <a href="?column=price&sort={{ if eq .Filter.Column " price" }}{{ if eq .Filter.Sort "asc"
+                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
+                                Price
+                            </a>
+                        </th>
+
+                        <th>Deleted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $index, $p := .models }}
+                    <tr>
+                        <td>{{ add $index 1 }}</td>
+                        <td>{{ $p.ID }}</td>
+                        <td>{{ $p.Name }}</td>
+                        <td>${{ $p.Price }}</td>
+                        <td>{{ $p.DeletedAt }}</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="/api/v1/admin/product/{{ $p.ID }}" class="btn btn-sm btn-outline-primary"
+                                    title="View">
+                                    <i class="ph ph-eye"></i>
+                                </a>
+                                <a href="/api/v1/admin/product/{{ $p.ID }}/edit" class="btn btn-sm btn-outline-warning"
+                                    title="Edit">
+                                    <i class="ph ph-pencil-simple"></i>
+                                </a>
+                                <form action="/api/v1/admin/product/{{ $p.ID }}/delete" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <i class="ph ph-trash"></i>
+                                    </button>
+                                </form>
+                                {{ if ne $p.DeletedAt "01-01-0001 00:00:00" }}
+                                <form action="/api/v1/admin/product/{{ $p.ID }}/restore" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">↩</button>
+                                </form>
+                                <form action="/api/v1/admin/product/{{ $p.ID }}/force" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('This will permanently delete the product. Continue?')">
+                                        ❌
+                                    </button>
+                                </form>
+                                {{ end }}
+
+
+                            </div>
+                        </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-3">No products found 😔</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-3">
+            {{ template "pagination" . }}
+        </div>
+
+    </div>
 </div>
 {{ end }}

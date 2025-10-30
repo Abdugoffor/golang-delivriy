@@ -98,15 +98,27 @@ var templateFuncs = template.FuncMap{
 
 		return pages
 	},
+	"safeHTML": func(s string) template.HTML {
+		return template.HTML(s)
+	},
 }
 
-func View(ctx echo.Context, layoutName, viewName string, data interface{}) error {
+func View(ctx echo.Context, layoutName, viewName string, data map[string]interface{}) error {
+
+	data["Query"] = ctx.QueryParams()
+	data["Path"] = ctx.Request().URL.Path
+
 	tmpl, err := template.New("layout").
 		Funcs(templateFuncs).
-		ParseFiles("views/"+layoutName, "views/"+viewName)
+		ParseFiles(
+			"views/"+layoutName,
+			"views/"+viewName,
+			"views/components/pagination.html",
+		)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, "Template parsing error: "+err.Error())
 	}
 
+	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
 	return tmpl.ExecuteTemplate(ctx.Response().Writer, "layout", data)
 }
