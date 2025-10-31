@@ -25,7 +25,8 @@
                 <select name="status" class="form-control">
                     <option value="" {{ if eq .Filter.Status "" }}selected{{ end }}>ALL</option>
                     <option value="open" {{ if eq .Filter.Status "open" }}selected{{ end }}>OPEN</option>
-                    <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>DELETED</option>
+                    <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>DELETED
+                    </option>
                 </select>
             </div>
 
@@ -43,22 +44,13 @@
                     <tr>
                         <th>#</th>
                         <th>
-                            <a href="?column=id&sort={{ if eq .Filter.Column " id" }}{{ if eq .Filter.Sort "asc"
-                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
-                                ID
-                            </a>
+                            ID
                         </th>
                         <th>
-                            <a href="?column=name&sort={{ if eq .Filter.Column " name" }}{{ if eq .Filter.Sort "asc"
-                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
-                                Name
-                            </a>
+                            Name
                         </th>
                         <th>
-                            <a href="?column=price&sort={{ if eq .Filter.Column " price" }}{{ if eq .Filter.Sort "asc"
-                                }}desc{{ else }}asc{{ end }}{{ else }}desc{{ end }}">
-                                Price
-                            </a>
+                            Price
                         </th>
 
                         <th>Deleted</th>
@@ -75,6 +67,18 @@
                         <td>{{ $p.DeletedAt }}</td>
                         <td>
                             <div class="d-flex gap-1">
+
+                                {{ if ne $p.DeletedAt "" }}
+                                <form action="/api/v1/admin/product/{{ $p.ID }}/restore" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">↩</button>
+                                </form>
+                                <form action="/api/v1/admin/product/{{ $p.ID }}/force" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('This will permanently delete the product. Continue?')">
+                                        ❌
+                                    </button>
+                                </form>
+                                {{ else }}
                                 <a href="/api/v1/admin/product/{{ $p.ID }}" class="btn btn-sm btn-outline-primary"
                                     title="View">
                                     <i class="ph ph-eye"></i>
@@ -86,16 +90,6 @@
                                 <form action="/api/v1/admin/product/{{ $p.ID }}/delete" method="post">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                                         <i class="ph ph-trash"></i>
-                                    </button>
-                                </form>
-                                {{ if ne $p.DeletedAt "01-01-0001 00:00:00" }}
-                                <form action="/api/v1/admin/product/{{ $p.ID }}/restore" method="post">
-                                    <button type="submit" class="btn btn-sm btn-outline-success">↩</button>
-                                </form>
-                                <form action="/api/v1/admin/product/{{ $p.ID }}/force" method="post">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('This will permanently delete the product. Continue?')">
-                                        ❌
                                     </button>
                                 </form>
                                 {{ end }}

@@ -46,12 +46,10 @@ func ProductSeeder() {
 	for i, name := range productNames {
 		slug := helper.Slug(name)
 
-		// var exists product_model.Product
-		// if err := config.DB.Where("slug = ?", slug).First(&exists).Error; err == gorm.ErrRecordNotFound {
 		product := product_model.Product{
 			Name:      name,
 			Slug:      slug,
-			Price:     rand.Int63n(5000), // 100 dan 5100 gacha random narx
+			Price:     rand.Int63n(300),
 			IsActive:  true,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -62,8 +60,5 @@ func ProductSeeder() {
 		} else {
 			log.Printf("✅ (%d) Product qo‘shildi: %s", i+1, product.Name)
 		}
-		// } else {
-		// 	log.Printf("ℹ️ Product '%s' allaqachon mavjud, o‘tkazib yuborildi", slug)
-		// }
 	}
 }

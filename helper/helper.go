@@ -11,6 +11,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func LoadEnv() {
@@ -57,8 +58,18 @@ func FormatTime(date time.Time) string {
 	return date.Format("15:04:05")
 }
 
-func FormatDate(date time.Time) string {
-	return date.Format("02-01-2006 15:04:05")
+func FormatDate(v any) string {
+	switch t := v.(type) {
+	case time.Time:
+		return t.Format("02-01-2006 15:04:05")
+	case gorm.DeletedAt:
+		if t.Valid {
+			return t.Time.Format("02-01-2006 15:04:05")
+		}
+		return ""
+	default:
+		return ""
+	}
 }
 
 var templateFuncs = template.FuncMap{

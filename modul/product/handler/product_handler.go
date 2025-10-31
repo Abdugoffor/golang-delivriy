@@ -53,10 +53,16 @@ func (handler *productHandler) All(ctx echo.Context) error {
 
 	filter := func(tx *gorm.DB) *gorm.DB {
 
-		if query.Status == "open" {
-			tx = tx.Where("products.deleted_at IS NULL")
-		} else if query.Status == "deleted" {
-			tx = tx.Where("products.deleted_at IS NOT NULL")
+		switch query.Status {
+		case "open":
+			
+			tx = tx.Where("deleted_at IS NULL")
+		case "deleted":
+			
+			tx = tx.Unscoped().Where("deleted_at IS NOT NULL")
+		default:
+			
+			tx = tx.Unscoped()
 		}
 
 		if query.Name != "" {
@@ -64,21 +70,13 @@ func (handler *productHandler) All(ctx echo.Context) error {
 		}
 
 		if query.Price != 0 {
-			tx = tx.Where("products.price = ?", query.Price)
+			// Price int64 -> text qilib qidirmoqdamiz
+			tx = tx.Where("CAST(products.price AS TEXT) LIKE ?", fmt.Sprintf("%%%d%%", query.Price))
 		}
 
-		// tx = tx.Group("products.id").
-		// 	Order("products.created_at ASC")
+		tx = tx.Group("products.id").
+			Order("products.created_at ASC")
 
-		if query.Column != "" && query.Sort != "" {
-			groupColumn := fmt.Sprintf("products.%s", query.Column)
-			tx = tx.
-				Group(groupColumn).
-				Order(fmt.Sprintf("products.%s %s", query.Column, query.Sort))
-		} else {
-			tx = tx.Group("products.id").
-				Order("products.created_at DESC")
-		}
 		return tx
 	}
 
