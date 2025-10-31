@@ -11,14 +11,14 @@ import (
 
 type ProductService interface {
 	All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
-	Show(ctx echo.Context, id uint) (product_dto.Response, error)
-	Trash(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error)
+	Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (product_dto.Response, error)
+	Trash(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
 	ShowTrash(ctx echo.Context, id uint) (product_dto.Response, error)
 	Create(ctx echo.Context, req product_dto.Create) (product_dto.Response, error)
-	Update(ctx echo.Context, id uint, req product_dto.Update) (product_dto.Response, error)
-	Delete(ctx echo.Context, id uint) error
-	ForceDelete(ctx echo.Context, id uint) error
-	Restore(ctx echo.Context, id uint) (product_dto.Response, error)
+	Update(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB, req product_dto.Update) (product_dto.Response, error)
+	Delete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error
+	ForceDelete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error
+	Restore(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error
 }
 
 type productService struct {
@@ -52,10 +52,10 @@ func (service *productService) All(ctx echo.Context, filter func(tx *gorm.DB) *g
 	}, nil
 }
 
-func (service *productService) Show(ctx echo.Context, id uint) (product_dto.Response, error) {
+func (service *productService) Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (product_dto.Response, error) {
 	var model product_model.Product
 	{
-		if err := service.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if err := service.db.Scopes(filter).First(&model).Error; err != nil {
 			return product_dto.Response{}, err
 		}
 	}
@@ -65,10 +65,10 @@ func (service *productService) Show(ctx echo.Context, id uint) (product_dto.Resp
 	return res, nil
 }
 
-func (service *productService) Trash(ctx echo.Context) (helper.PaginatedResponse[product_dto.Response], error) {
+func (service *productService) Trash(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error) {
 	var models []product_model.Product
 
-	res, err := helper.PaginateOnlyTrashed(ctx, service.db, &models, 10)
+	res, err := helper.PaginateOnlyTrashed(ctx, service.db.Scopes(filter), &models, 10)
 	{
 		if err != nil {
 			return helper.PaginatedResponse[product_dto.Response]{}, err
@@ -119,10 +119,10 @@ func (service *productService) Create(ctx echo.Context, req product_dto.Create) 
 	return res, nil
 }
 
-func (service *productService) Update(ctx echo.Context, id uint, req product_dto.Update) (product_dto.Response, error) {
+func (service *productService) Update(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB, req product_dto.Update) (product_dto.Response, error) {
 	var model product_model.Product
 	{
-		if err := service.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if err := service.db.Scopes(filter).First(&model).Error; err != nil {
 			return product_dto.Response{}, err
 		}
 	}
@@ -139,10 +139,10 @@ func (service *productService) Update(ctx echo.Context, id uint, req product_dto
 	return res, nil
 }
 
-func (service *productService) Delete(ctx echo.Context, id uint) error {
+func (service *productService) Delete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
 	var model product_model.Product
 	{
-		if err := service.db.Where("id = ?", id).First(&model).Error; err != nil {
+		if err := service.db.Scopes(filter).First(&model).Error; err != nil {
 			return err
 		}
 	}
@@ -154,10 +154,10 @@ func (service *productService) Delete(ctx echo.Context, id uint) error {
 	return nil
 }
 
-func (service *productService) ForceDelete(ctx echo.Context, id uint) error {
+func (service *productService) ForceDelete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
 	var model product_model.Product
 	{
-		if err := service.db.Unscoped().Where("id = ?", id).First(&model).Error; err != nil {
+		if err := service.db.Unscoped().Scopes(filter).First(&model).Error; err != nil {
 			return err
 		}
 	}
@@ -169,18 +169,16 @@ func (service *productService) ForceDelete(ctx echo.Context, id uint) error {
 	return nil
 }
 
-func (service *productService) Restore(ctx echo.Context, id uint) (product_dto.Response, error) {
+func (service *productService) Restore(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
 	var model product_model.Product
 	{
-		if err := service.db.Unscoped().Where("id = ?", id).First(&model).Error; err != nil {
-			return product_dto.Response{}, err
+		if err := service.db.Unscoped().Scopes(filter).First(&model).Error; err != nil {
+			return err
 		}
 	}
 
-	if err := service.db.Model(&model).Update("deleted_at", nil).Error; err != nil {
-		return product_dto.Response{}, err
+	if err := service.db.Model(&model).Unscoped().Update("deleted_at", nil).Error; err != nil {
+		return err
 	}
-
-	res := product_dto.ToResponse(model)
-	return res, nil
+	return nil
 }

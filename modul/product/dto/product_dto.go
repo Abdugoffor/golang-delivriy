@@ -6,24 +6,27 @@ import (
 )
 
 type Create struct {
-	Name  string `json:"name"`
-	Price int    `json:"price"`
+	Name  string `json:"name" query:"name" form:"name"`
+	Price int64  `json:"price" query:"price" form:"price"`
 }
 
 type Update struct {
-	Name  string `json:"name"`
-	Price int    `json:"price"`
+	Name  string `json:"name" query:"name" form:"name"`
+	Price int64  `json:"price" query:"price" form:"price"`
 }
 type Filter struct {
-	Name  string `json:"name" query:"name" form:"name"`
-	Price int    `json:"price" query:"price" form:"price"`
+	Name   string `json:"name" query:"name" form:"name"`
+	Price  int64  `json:"price" query:"price" form:"price"`
+	Status string `json:"status" query:"status" form:"status"`
+	Sort   string `json:"sort" query:"sort" form:"sort"`
+	Column string `json:"column" query:"column" form:"column"`
 }
 
 type Response struct {
-	ID        uint   `json:"id"`
+	ID        int64  `json:"id"`
 	Name      string `json:"name"`
 	Slug      string `json:"slug"`
-	Price     int    `json:"price"`
+	Price     int64  `json:"price"`
 	IsActive  bool   `json:"is_active"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
@@ -39,6 +42,6 @@ func ToResponse(product product_model.Product) Response {
 		IsActive:  product.IsActive,
 		CreatedAt: helper.FormatDate(product.CreatedAt),
 		UpdatedAt: helper.FormatDate(product.UpdatedAt),
-		DeletedAt: helper.FormatDate(product.DeletedAt.Time),
+		DeletedAt: helper.FormatDate(product.DeletedAt),
 	}
 }

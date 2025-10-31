@@ -11,6 +11,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
 func LoadEnv() {
@@ -57,8 +58,18 @@ func FormatTime(date time.Time) string {
 	return date.Format("15:04:05")
 }
 
-func FormatDate(date time.Time) string {
-	return date.Format("02-01-2006 15:04:05")
+func FormatDate(v any) string {
+	switch t := v.(type) {
+	case time.Time:
+		return t.Format("02-01-2006 15:04:05")
+	case gorm.DeletedAt:
+		if t.Valid {
+			return t.Time.Format("02-01-2006 15:04:05")
+		}
+		return ""
+	default:
+		return ""
+	}
 }
 
 var templateFuncs = template.FuncMap{
@@ -98,15 +109,27 @@ var templateFuncs = template.FuncMap{
 
 		return pages
 	},
+	"safeHTML": func(s string) template.HTML {
+		return template.HTML(s)
+	},
 }
 
-func View(ctx echo.Context, layoutName, viewName string, data interface{}) error {
+func View(ctx echo.Context, layoutName, viewName string, data map[string]interface{}) error {
+
+	data["Query"] = ctx.QueryParams()
+	data["Path"] = ctx.Request().URL.Path
+
 	tmpl, err := template.New("layout").
 		Funcs(templateFuncs).
-		ParseFiles("views/"+layoutName, "views/"+viewName)
+		ParseFiles(
+			"views/"+layoutName,
+			"views/"+viewName,
+			"views/components/pagination.html",
+		)
 	if err != nil {
 		return ctx.String(http.StatusInternalServerError, "Template parsing error: "+err.Error())
 	}
 
+	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
 	return tmpl.ExecuteTemplate(ctx.Response().Writer, "layout", data)
 }
