@@ -5,6 +5,7 @@ import (
 	"my-project/config"
 	"my-project/helper"
 	product_cmd "my-project/modul/product"
+	"my-project/seeder"
 
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +15,7 @@ func main() {
 
 	config.DBConnect()
 
-	// seeder.DBSeed()
+	seeder.DBSeed()
 
 	route := echo.New()
 
