@@ -55,13 +55,13 @@ func (handler *productHandler) All(ctx echo.Context) error {
 
 		switch query.Status {
 		case "open":
-			
+
 			tx = tx.Where("deleted_at IS NULL")
 		case "deleted":
-			
+
 			tx = tx.Unscoped().Where("deleted_at IS NOT NULL")
 		default:
-			
+
 			tx = tx.Unscoped()
 		}
 
@@ -74,8 +74,18 @@ func (handler *productHandler) All(ctx echo.Context) error {
 			tx = tx.Where("CAST(products.price AS TEXT) LIKE ?", fmt.Sprintf("%%%d%%", query.Price))
 		}
 
-		tx = tx.Group("products.id").
-			Order("products.created_at ASC")
+		// tx = tx.Group("products.id").
+		// 	Order("products.created_at ASC")
+
+		orderClause := "products.created_at ASC"
+
+		if query.Column != "" && query.Sort != "" {
+			orderClause = fmt.Sprintf("products.%s %s", query.Column, query.Sort)
+		}
+
+		fmt.Println(orderClause)
+
+		tx = tx.Group("products.id").Order(orderClause)
 
 		return tx
 	}
