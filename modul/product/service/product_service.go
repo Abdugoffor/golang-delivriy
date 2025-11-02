@@ -12,8 +12,6 @@ import (
 type ProductService interface {
 	All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
 	Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (product_dto.Response, error)
-	Trash(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error)
-	ShowTrash(ctx echo.Context, id uint) (product_dto.Response, error)
 	Create(ctx echo.Context, req product_dto.Create) (product_dto.Response, error)
 	Update(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB, req product_dto.Update) (product_dto.Response, error)
 	Delete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error

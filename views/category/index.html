@@ -1,0 +1,140 @@
+{{ define "content" }}
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+            <h1 class="h4 mb-3 mb-md-0">
+                <i class="ph ph-folders text-primary"></i> Category List
+            </h1>
+            <a href="/api/v1/admin/category/create" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+                <i class="ph ph-plus"></i> Add Category
+            </a>
+        </div>
+
+        <!-- Search form -->
+        <form method="GET" class="row g-2 mb-4 align-items-end">
+            <div class="col-md">
+                <label class="form-label small text-muted mb-1">Name</label>
+                <input type="text" name="name" placeholder="Search name..." value="{{ .Filter.Name }}"
+                    class="form-control rounded-3">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Status</label>
+                <select name="status" class="form-select rounded-3">
+                    <option value="" {{ if eq .Filter.Status "" }}selected{{ end }}>ALL</option>
+                    <option value="open" {{ if eq .Filter.Status "open" }}selected{{ end }}>OPEN</option>
+                    <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>DELETED</option>
+                </select>
+            </div>
+
+            <input type="hidden" name="column" value="{{ .Filter.Column }}">
+            <input type="hidden" name="sort" value="{{ .Filter.Sort }}">
+
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-secondary d-flex align-items-center gap-2 shadow-sm">
+                    <i class="ph ph-magnifying-glass"></i> Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-bordered rounded-3 shadow-sm overflow-hidden">
+                <thead class="table-light text-uppercase small fw-semibold">
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="10%">
+                            <a class="text-decoration-none {{ if eq .Filter.Column "id" }}text-primary fw-bold{{ end
+                                }}" href="?column=id&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end
+                                }}&name={{ .Filter.Name }}&status={{ .Filter.Status }}">
+                                ID
+                                {{ if eq .Filter.Column "id" }}
+                                <i class="ph {{ if eq .Filter.Sort "asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end
+                                    }}"></i>
+                                {{ end }}
+                            </a>
+                        </th>
+                        <th width="35%">
+                            <a class="text-decoration-none {{ if eq .Filter.Column "name" }}text-primary fw-bold{{ end
+                                }}" href="?column=name&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end
+                                }}&name={{ .Filter.Name }}&status={{ .Filter.Status }}">
+                                Name
+                                {{ if eq .Filter.Column "name" }}
+                                <i class="ph {{ if eq .Filter.Sort " asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end
+                                    }}"></i>
+                                {{ end }}
+                            </a>
+                        </th>
+                        <th width="25%">Slug</th>
+                        <th width="10%">Active</th>
+                        <th width="10%">Deleted</th>
+                        <th width="15%">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range $index, $c := .models }}
+                    <tr class="{{ if ne $c.DeletedAt "" }}table-danger{{ end }}">
+                        <td>{{ add $index 1 }}</td>
+                        <td>{{ $c.ID }}</td>
+                        <td>{{ $c.Name }}</td>
+                        <td>{{ $c.Slug }}</td>
+                        <td>
+                            {{ if $c.IsActive }}
+                            <span class="badge bg-success">Yes</span>
+                            {{ else }}
+                            <span class="badge bg-secondary">No</span>
+                            {{ end }}
+                        </td>
+                        <td>{{ $c.DeletedAt }}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                {{ if ne $c.DeletedAt "" }}
+                                <form action="/api/v1/admin/category/{{ $c.ID }}/restore" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-circle"
+                                        title="Restore">
+                                        <i class="ph ph-arrow-counter-clockwise"></i>
+                                    </button>
+                                </form>
+                                <form action="/api/v1/admin/category/{{ $c.ID }}/force" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
+                                        title="Delete permanently"
+                                        onclick="return confirm('This will permanently delete the category. Continue?')">
+                                        <i class="ph ph-x"></i>
+                                    </button>
+                                </form>
+                                {{ else }}
+                                <a href="/api/v1/admin/category/{{ $c.ID }}"
+                                    class="btn btn-sm btn-outline-primary rounded-circle" title="View">
+                                    <i class="ph ph-eye"></i>
+                                </a>
+                                <a href="/api/v1/admin/category/{{ $c.ID }}/edit"
+                                    class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
+                                    <i class="ph ph-pencil"></i>
+                                </a>
+                                <form action="/api/v1/admin/category/{{ $c.ID }}/delete" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
+                                        title="Delete">
+                                        <i class="ph ph-trash"></i>
+                                    </button>
+                                </form>
+                                {{ end }}
+                            </div>
+                        </td>
+                    </tr>
+                    {{ else }}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-3">No categories found 😔</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-3">
+            {{ template "pagination" . }}
+        </div>
+    </div>
+</div>
+{{ end }}

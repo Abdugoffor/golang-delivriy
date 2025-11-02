@@ -1,12 +1,11 @@
-package product_handler
+package category_handler
 
 import (
 	"fmt"
 	"log"
 	"my-project/helper"
-	history_service "my-project/modul/history/service"
-	product_dto "my-project/modul/product/dto"
-	product_service "my-project/modul/product/service"
+	category_dto "my-project/modul/category/dto"
+	category_service "my-project/modul/category/service"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,21 +14,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type productHandler struct {
-	db             *gorm.DB
-	log            *log.Logger
-	service        product_service.ProductService
-	historyService history_service.HistoryService
+type categoryHandler struct {
+	db      *gorm.DB
+	log     *log.Logger
+	service category_service.CategoryService
 }
 
-func NewProductHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *productHandler {
-	handler := &productHandler{
-		db:             db,
-		log:            log,
-		service:        product_service.NewProductService(db),
-		historyService: history_service.NewHistoryService(db),
+func NewCategoryHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) categoryHandler {
+	handler := categoryHandler{
+		db:      db,
+		log:     log,
+		service: category_service.NewCategoryService(db),
 	}
-	routes := gorm.Group("/product")
+
+	routes := gorm.Group("/category")
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)
@@ -41,11 +39,12 @@ func NewProductHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *productH
 		routes.POST("/:id/restore", handler.Restore)
 		routes.POST("/:id/force", handler.ForceDelete)
 	}
+
 	return handler
 }
 
-func (handler *productHandler) All(ctx echo.Context) error {
-	var query product_dto.Filter
+func (handler *categoryHandler) All(ctx echo.Context) error {
+	var query category_dto.Filter
 	{
 		if err := ctx.Bind(&query); err != nil {
 			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
@@ -63,22 +62,17 @@ func (handler *productHandler) All(ctx echo.Context) error {
 			tx = tx.Unscoped()
 		}
 
-		// Name bo‘yicha qidiruv (case-insensitive, barcha DB lar uchun)
 		if query.Name != "" {
 			name := "%" + strings.ToLower(query.Name) + "%"
-			tx = tx.Where("LOWER(products.name) LIKE ?", name)
+			tx = tx.Where("LOWER(categories.name) LIKE ?", name)
 		}
 
-		if query.Price != 0 {
-			tx = tx.Where("CAST(products.price AS TEXT) LIKE ?", fmt.Sprintf("%%%d%%", query.Price))
-		}
-
-		orderClause := "products.created_at ASC"
+		orderClause := "categories.created_at ASC"
 		if query.Column != "" && query.Sort != "" {
-			orderClause = fmt.Sprintf("products.%s %s", query.Column, query.Sort)
+			orderClause = fmt.Sprintf("categories.%s %s", query.Column, query.Sort)
 		}
 
-		tx = tx.Group("products.id").Order(orderClause)
+		tx = tx.Group("categories.id").Order(orderClause)
 
 		return tx
 	}
@@ -96,10 +90,10 @@ func (handler *productHandler) All(ctx echo.Context) error {
 		"Filter": query,
 	}
 
-	return helper.View(ctx, "layout.html", "product/index.html", viewData)
+	return helper.View(ctx, "layout.html", "category/index.html", viewData)
 }
 
-func (handler *productHandler) Show(ctx echo.Context) error {
+func (handler *categoryHandler) Show(ctx echo.Context) error {
 
 	idParam := ctx.Param("id")
 
@@ -127,48 +121,18 @@ func (handler *productHandler) Show(ctx echo.Context) error {
 	viewData := map[string]interface{}{
 		"model": data,
 	}
-	return helper.View(ctx, "layout.html", "product/show.html", viewData)
-}
-func (handler *productHandler) Edit(ctx echo.Context) error {
-
-	idParam := ctx.Param("id")
-
-	parsedID, err := strconv.ParseInt(idParam, 10, 64)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
-		}
-	}
-
-	filter := func(tx *gorm.DB) *gorm.DB {
-
-		if parsedID > 0 {
-			tx = tx.Where("id = ?", parsedID)
-		}
-		return tx
-	}
-
-	data, err := handler.service.Show(ctx, filter)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
-		}
-	}
-	viewData := map[string]interface{}{
-		"model": data,
-	}
-	return helper.View(ctx, "layout.html", "product/edit.html", viewData)
-	// return ctx.JSON(http.StatusOK, data)
+	return helper.View(ctx, "layout.html", "category/show.html", viewData)
 }
 
-func (handler *productHandler) Create(ctx echo.Context) error {
+func (handler *categoryHandler) Create(ctx echo.Context) error {
 
 	viewData := map[string]interface{}{}
 
-	return helper.View(ctx, "layout.html", "product/create.html", viewData)
+	return helper.View(ctx, "layout.html", "category/create.html", viewData)
 }
-func (handler *productHandler) Store(ctx echo.Context) error {
-	var req product_dto.Create
+
+func (handler *categoryHandler) Store(ctx echo.Context) error {
+	var req category_dto.Create
 	{
 		if err := ctx.Bind(&req); err != nil {
 			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
@@ -182,11 +146,42 @@ func (handler *productHandler) Store(ctx echo.Context) error {
 		}
 	}
 
-	url := fmt.Sprintf("/api/v1/admin/product/%d", data.ID)
+	url := fmt.Sprintf("/api/v1/admin/category/%d", data.ID)
 	return ctx.Redirect(http.StatusSeeOther, url)
 }
 
-func (handler *productHandler) Update(ctx echo.Context) error {
+func (handler *categoryHandler) Edit(ctx echo.Context) error {
+
+	idParam := ctx.Param("id")
+
+	parsedID, err := strconv.ParseInt(idParam, 10, 64)
+	{
+		if err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
+		}
+	}
+
+	filter := func(tx *gorm.DB) *gorm.DB {
+
+		if parsedID > 0 {
+			tx = tx.Where("id = ?", parsedID)
+		}
+		return tx
+	}
+
+	data, err := handler.service.Show(ctx, filter)
+	{
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		}
+	}
+	viewData := map[string]interface{}{
+		"model": data,
+	}
+	return helper.View(ctx, "layout.html", "category/edit.html", viewData)
+}
+
+func (handler *categoryHandler) Update(ctx echo.Context) error {
 	idParam := ctx.Param("id")
 	parsedID, err := strconv.ParseUint(idParam, 10, 64)
 	{
@@ -195,7 +190,7 @@ func (handler *productHandler) Update(ctx echo.Context) error {
 		}
 	}
 
-	var req product_dto.Update
+	var req category_dto.Update
 	{
 		if err := ctx.Bind(&req); err != nil {
 			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
@@ -217,11 +212,11 @@ func (handler *productHandler) Update(ctx echo.Context) error {
 		}
 	}
 
-	url := fmt.Sprintf("/api/v1/admin/product/%d", data.ID)
+	url := fmt.Sprintf("/api/v1/admin/category/%d", data.ID)
 	return ctx.Redirect(http.StatusSeeOther, url)
 }
 
-func (handler *productHandler) Delete(ctx echo.Context) error {
+func (handler *categoryHandler) Delete(ctx echo.Context) error {
 	idParam := ctx.Param("id")
 	parsedID, err := strconv.ParseUint(idParam, 10, 64)
 	{
@@ -245,37 +240,10 @@ func (handler *productHandler) Delete(ctx echo.Context) error {
 		}
 	}
 
-	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/product")
+	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/category")
 }
 
-func (handler *productHandler) ForceDelete(ctx echo.Context) error {
-	idParam := ctx.Param("id")
-	parsedID, err := strconv.ParseUint(idParam, 10, 64)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
-		}
-	}
-
-	filter := func(tx *gorm.DB) *gorm.DB {
-
-		if parsedID > 0 {
-			tx = tx.Where("id = ?", parsedID)
-		}
-		return tx
-	}
-
-	err = handler.service.ForceDelete(ctx, filter)
-	{
-		if err != nil {
-			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
-		}
-	}
-
-	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/product/trash")
-}
-
-func (handler *productHandler) Restore(ctx echo.Context) error {
+func (handler *categoryHandler) Restore(ctx echo.Context) error {
 	idParam := ctx.Param("id")
 	parsedID, err := strconv.ParseUint(idParam, 10, 64)
 	{
@@ -296,5 +264,29 @@ func (handler *productHandler) Restore(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 	}
 
-	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/product")
+	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/category")
+}
+
+func (handler *categoryHandler) ForceDelete(ctx echo.Context) error {
+	idParam := ctx.Param("id")
+	parsedID, err := strconv.ParseUint(idParam, 10, 64)
+	{
+		if err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": "invalid id"})
+		}
+	}
+
+	filter := func(tx *gorm.DB) *gorm.DB {
+
+		if parsedID > 0 {
+			tx = tx.Where("id = ?", parsedID)
+		}
+		return tx
+	}
+
+	if err := handler.service.ForceDelete(ctx, filter); err != nil {
+		return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+	}
+
+	return ctx.Redirect(http.StatusSeeOther, "/api/v1/admin/category")
 }
