@@ -1,0 +1,13 @@
+{{ define "content" }}
+<div class="card shadow-sm p-4">
+    <h3 class="fw-semibold mb-3">{{ .model.Name }}</h3>
+    <p><strong>IsActive:</strong> ${{ .model.IsActive }}</p>
+    <p><strong>Slug:</strong> {{ .model.Slug }}</p>
+    <p><strong>Created:</strong> {{ .model.CreatedAt }}</p>
+    <p><strong>Updated:</strong> {{ .model.UpdatedAt }}</p>
+    <div class="mt-3">
+        <a href="/api/v1/admin/category/{{ .model.ID }}/edit" class="btn btn-warning text-white">Edit</a>
+        <a href="/api/v1/admin/category" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+{{ end }}

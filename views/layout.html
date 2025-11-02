@@ -21,15 +21,15 @@
             </div>
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="/api/v1/admin/product" class="nav-link {{ if eq .Active " product" }}active{{ else
+                    <a href="/api/v1/admin/product" class="nav-link {{ if eq .Active "product" }}active{{ else
                         }}text-light{{ end }}">
                         <i class="ph ph-package me-2"></i> Products
                     </a>
                 </li>
                 <li>
-                    <a href="/api/v1/admin/product/trash" class="nav-link {{ if eq .Active " trash" }}active{{ else
+                    <a href="/api/v1/admin/category" class="nav-link {{ if eq .Active "IsActive" }}active{{ else
                         }}text-light{{ end }}">
-                        <i class="ph ph-trash me-2"></i> Trash
+                        <i class="ph ph-trash me-2"></i> Categories
                     </a>
                 </li>
             </ul>

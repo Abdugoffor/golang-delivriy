@@ -2,12 +2,14 @@ package config
 
 import (
 	"log"
+	category_model "my-project/modul/category/model"
 	product_model "my-project/modul/product/model"
 )
 
 func RunMigrations() {
 	models := []interface{}{
 		&product_model.Product{},
+		&category_model.Category{},
 	}
 	err := DB.AutoMigrate(models...)
 
