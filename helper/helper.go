@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -70,6 +71,12 @@ func FormatDate(v any) string {
 	default:
 		return ""
 	}
+}
+
+var validate = validator.New()
+
+func ValidateStruct(data interface{}) error {
+	return validate.Struct(data)
 }
 
 var templateFuncs = template.FuncMap{
