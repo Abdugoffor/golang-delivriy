@@ -3,6 +3,7 @@ package company_handler
 import (
 	"fmt"
 	"log"
+	"my-project/middleware"
 	company_dto "my-project/modul/company/dto"
 	company_service "my-project/modul/company/service"
 	"net/http"
@@ -26,7 +27,7 @@ func NewCompanyHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) companyHa
 		service: company_service.NewCompanyService(db),
 	}
 
-	routes := gorm.Group("/company")
+	routes := gorm.Group("/company", middleware.JWTMiddleware("secret"))
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)
