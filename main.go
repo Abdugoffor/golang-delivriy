@@ -4,6 +4,7 @@ import (
 	"log"
 	"my-project/config"
 	"my-project/helper"
+	"my-project/middleware"
 	auth_cmd "my-project/modul/auth"
 	category_dto "my-project/modul/category"
 	company_cmd "my-project/modul/company"
@@ -21,6 +22,8 @@ func main() {
 	seeder.DBSeed()
 
 	route := echo.New()
+
+	route.Use(middleware.SessionSet())
 
 	product_cmd.Cmd(route, config.DB, log.Default())
 

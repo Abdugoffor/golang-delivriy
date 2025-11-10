@@ -27,7 +27,7 @@ func NewCompanyHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) companyHa
 		service: company_service.NewCompanyService(db),
 	}
 
-	routes := gorm.Group("/company", middleware.JWTMiddleware("secret"))
+	routes := gorm.Group("/company", middleware.SessionAuthMiddleware)
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)

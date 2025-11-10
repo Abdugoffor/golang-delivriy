@@ -1,6 +1,7 @@
 package auth_handler
 
 import (
+	"fmt"
 	"log"
 	"my-project/helper"
 	"my-project/middleware"
@@ -8,6 +9,7 @@ import (
 	auth_service "my-project/modul/auth/service"
 	"net/http"
 
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -27,7 +29,9 @@ func NewAuthHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *authHandler
 
 	routes := gorm.Group("/auth")
 	{
+		routes.GET("/register", handler.RegisterForm)
 		routes.POST("/register", handler.Register)
+		routes.GET("/login", handler.LoginForm)
 		routes.POST("/login", handler.Login)
 		routes.POST("/refresh", handler.Refresh)
 		routes.POST("/logout", handler.Logout)
@@ -35,6 +39,12 @@ func NewAuthHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *authHandler
 	}
 
 	return &handler
+}
+
+func (handler *authHandler) RegisterForm(ctx echo.Context) error {
+
+	viewData := map[string]interface{}{}
+	return helper.View(ctx, "layout.html", "auth/register.html", viewData)
 }
 
 func (handler *authHandler) Register(ctx echo.Context) error {
@@ -56,7 +66,28 @@ func (handler *authHandler) Register(ctx echo.Context) error {
 		}
 	}
 
-	return ctx.JSON(http.StatusCreated, data)
+	// ✅ Sessionga saqlaymiz
+	sess, _ := session.Get("session", ctx)
+	sess.Values["token"] = data.Token
+	sess.Values["user_id"] = data.User.ID
+	sess.Values["user_email"] = data.User.Email
+	sess.Values["user_name"] = data.User.Name
+	sess.Save(ctx.Request(), ctx.Response())
+
+	// return ctx.JSON(http.StatusCreated, data)
+	return ctx.Redirect(http.StatusFound, "/api/v1/admin/company")
+}
+
+func (handler *authHandler) LoginForm(ctx echo.Context) error {
+	sess, _ := session.Get("session", ctx)
+
+	fmt.Println(sess.Values["user_id"])
+	fmt.Println(sess.Values["user_name"])
+	fmt.Println(sess.Values["user_email"])
+	fmt.Println(sess.Values["token"])
+
+	viewData := map[string]interface{}{}
+	return helper.View(ctx, "layout.html", "auth/login.html", viewData)
 }
 
 func (handler *authHandler) Login(ctx echo.Context) error {
@@ -78,7 +109,16 @@ func (handler *authHandler) Login(ctx echo.Context) error {
 		}
 	}
 
-	return ctx.JSON(http.StatusOK, data)
+	// ✅ Sessionga saqlaymiz
+	sess, _ := session.Get("session", ctx)
+	sess.Values["token"] = data.Token
+	sess.Values["user_id"] = data.User.ID
+	sess.Values["user_email"] = data.User.Email
+	sess.Values["user_name"] = data.User.Name
+	sess.Save(ctx.Request(), ctx.Response())
+
+	// return ctx.JSON(http.StatusOK, data)
+	return ctx.Redirect(http.StatusFound, "/api/v1/admin/company")
 }
 
 func (handler *authHandler) Refresh(ctx echo.Context) error {
