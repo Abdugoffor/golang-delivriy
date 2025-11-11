@@ -15,7 +15,7 @@ func SessionAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		token, ok := sess.Values["token"].(string)
 		{
 			if !ok || token == "" {
-				return ctx.Redirect(http.StatusFound, "/login")
+				return ctx.Redirect(http.StatusFound, "/api/v1/admin/auth/login")
 			}
 		}
 

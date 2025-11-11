@@ -178,10 +178,56 @@
         <div class="main-content">
             <div class="main-header d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
+
                     <span class="menu-toggle d-lg-none" onclick="toggleSidebar()">
                         <i class="ph ph-list fs-3 text-primary"></i>
                     </span>
                     <h4 class="fw-semibold text-primary mb-0">{{ .Title }}</h4>
+                </div>
+                <!-- Right side: profile, role select, logout -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Role select -->
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-decoration-none" href="#" id="profileDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="ms-2 fw-medium text-dark">Role: Admin</span>
+                            <i class="ph ph-caret-down ms-1"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
+                            <li>
+                                <a class="dropdown-item" href="/profile">Profile</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/profile">Profile</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Profile dropdown -->
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-decoration-none" href="#" id="profileDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+
+                            <span class="ms-2 fw-medium text-dark"><i class="ph ph-user me-1"></i> User Name</span>
+                            <i class="ph ph-caret-down ms-1"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="/profile"><i class="ph ph-user me-1"></i> Profile</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="/api/v1/admin/auth/logout">
+                                    <button type="submit" class="dropdown-item text-danger"><i
+                                            class="ph ph-sign-out me-1"></i> Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 

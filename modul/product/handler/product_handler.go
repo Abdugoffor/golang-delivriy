@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"my-project/helper"
+	"my-project/middleware"
 	history_service "my-project/modul/history/service"
 	product_dto "my-project/modul/product/dto"
 	product_service "my-project/modul/product/service"
@@ -29,7 +30,7 @@ func NewProductHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *productH
 		service:        product_service.NewProductService(db),
 		historyService: history_service.NewHistoryService(db),
 	}
-	routes := gorm.Group("/product")
+	routes := gorm.Group("/product", middleware.SessionAuthMiddleware)
 	{
 		routes.GET("", handler.All)
 		routes.GET("/:id", handler.Show)

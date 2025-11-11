@@ -141,7 +141,8 @@ func (handler *authHandler) Logout(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
 	}
 
-	return ctx.JSON(http.StatusOK, echo.Map{"message": "success"})
+	// return ctx.JSON(http.StatusOK, echo.Map{"message": "success"})
+	return ctx.Redirect(http.StatusFound, "/api/v1/admin/auth/login")
 }
 
 func (handler *authHandler) Me(ctx echo.Context) error {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -99,7 +100,13 @@ func (service *authService) Refresh(ctx echo.Context) (auth_dto.AuthResponse, er
 }
 
 func (service *authService) Logout(ctx echo.Context) error {
-	// Agar redis yoki session ishlatilayotgan bo‘lsa shu yerda invalidatsiya qilinadi.
+
+	sess, _ := session.Get("session", ctx)
+	sess.Values["token"] = ""
+	sess.Values["user_id"] = ""
+	sess.Values["user_email"] = ""
+	sess.Values["user_name"] = ""
+	sess.Save(ctx.Request(), ctx.Response())
 	return nil
 }
 
