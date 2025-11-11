@@ -18,6 +18,7 @@ func RunMigrations() {
 
 		&product_model.Product{},
 	}
+
 	err := DB.AutoMigrate(models...)
 
 	if err != nil {
