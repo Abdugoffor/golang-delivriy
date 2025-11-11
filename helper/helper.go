@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -119,12 +120,27 @@ var templateFuncs = template.FuncMap{
 	"safeHTML": func(s string) template.HTML {
 		return template.HTML(s)
 	},
+
+	// ← AuthUser helper
+	"AuthUser": func(ctx echo.Context) map[string]interface{} {
+		sess, _ := session.Get("session", ctx)
+		if sess.IsNew || sess.Values["user_id"] == nil {
+			return nil
+		}
+		return map[string]interface{}{
+			"id":    sess.Values["user_id"],
+			"name":  sess.Values["user_name"],
+			"email": sess.Values["user_email"],
+			"token": sess.Values["token"],
+		}
+	},
 }
 
 func View(ctx echo.Context, layoutName, viewName string, data map[string]interface{}) error {
 
 	data["Query"] = ctx.QueryParams()
 	data["Path"] = ctx.Request().URL.Path
+	data["Context"] = ctx
 
 	tmpl, err := template.New("layout").
 		Funcs(templateFuncs).
@@ -139,4 +155,19 @@ func View(ctx echo.Context, layoutName, viewName string, data map[string]interfa
 
 	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)
 	return tmpl.ExecuteTemplate(ctx.Response().Writer, "layout", data)
+}
+
+func AuthUser(ctx echo.Context) map[string]interface{} {
+	sess, _ := session.Get("session", ctx)
+
+	if sess.IsNew || sess.Values["user_id"] == nil {
+		return nil
+	}
+
+	return map[string]interface{}{
+		"id":    sess.Values["user_id"],
+		"name":  sess.Values["user_name"],
+		"email": sess.Values["user_email"],
+		"token": sess.Values["token"],
+	}
 }

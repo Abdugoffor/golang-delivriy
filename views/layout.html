@@ -210,12 +210,18 @@
                     <div class="dropdown">
                         <a class="d-flex align-items-center text-decoration-none" href="#" id="profileDropdown"
                             data-bs-toggle="dropdown" aria-expanded="false">
-
-                            <span class="ms-2 fw-medium text-dark"><i class="ph ph-user me-1"></i> User Name</span>
+                            {{ $user := AuthUser .Context }}
+                            <span class="ms-2 fw-medium text-dark"> 
+                                {{ $user.name }}
+                            </span>
                             <i class="ph ph-caret-down ms-1"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" href="/profile"><i class="ph ph-user me-1"></i> Profile</a>
+                            <li>
+                                <a class="dropdown-item" href="/profile">
+                                    <i class="ph ph-user me-1"></i> 
+                                {{ $user.name }}
+                            </a>
                             </li>
                             <li>
                                 <hr class="dropdown-divider">

@@ -3,6 +3,7 @@ package company_handler
 import (
 	"fmt"
 	"log"
+	"my-project/helper"
 	"my-project/middleware"
 	company_dto "my-project/modul/company/dto"
 	company_service "my-project/modul/company/service"
@@ -51,6 +52,12 @@ func (handler *companyHandler) All(ctx echo.Context) error {
 		}
 	}
 
+	user := helper.AuthUser(ctx)
+
+	if user == nil {
+		return ctx.Redirect(http.StatusSeeOther, "/login")
+	}
+
 	filter := func(tx *gorm.DB) *gorm.DB {
 
 		switch query.Status {
@@ -79,7 +86,11 @@ func (handler *companyHandler) All(ctx echo.Context) error {
 			}
 		}
 
-		tx = tx.Group("company.id").Order(orderClause)
+		
+		tx = tx.Joins("JOIN company_user_roles ON company_user_roles.company_id = company.id").
+			Where("company_user_roles.user_id = ?", user["id"]).
+			Group("company.id").
+			Order(orderClause)
 
 		return tx
 	}
@@ -101,6 +112,7 @@ func (handler *companyHandler) All(ctx echo.Context) error {
 
 	// return helper.View(ctx, "layout.html", "company/index.html", viewData)
 }
+
 func (handler *companyHandler) Show(ctx echo.Context) error {
 	idParam := ctx.Param("id")
 
