@@ -1,7 +1,7 @@
 package seeder
 
 func DBSeed() {
-	ProductSeeder()
+	// ProductSeeder()
 	UserSeeder()
 	RoleSeeder()
 	CompanySeeder()

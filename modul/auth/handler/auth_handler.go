@@ -1,13 +1,13 @@
 package auth_handler
 
 import (
-	"fmt"
 	"log"
 	"my-project/helper"
 	"my-project/middleware"
 	auth_dto "my-project/modul/auth/dto"
 	auth_service "my-project/modul/auth/service"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -43,8 +43,10 @@ func NewAuthHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) *authHandler
 
 func (handler *authHandler) RegisterForm(ctx echo.Context) error {
 
-	viewData := map[string]interface{}{}
-	return helper.View(ctx, "layout.html", "auth/register.html", viewData)
+	viewData := map[string]interface{}{
+		"Year": time.Now().Year(),
+	}
+	return helper.View(ctx, "auth/layout.html", "auth/register.html", viewData)
 }
 
 func (handler *authHandler) Register(ctx echo.Context) error {
@@ -79,15 +81,17 @@ func (handler *authHandler) Register(ctx echo.Context) error {
 }
 
 func (handler *authHandler) LoginForm(ctx echo.Context) error {
-	sess, _ := session.Get("session", ctx)
+	// sess, _ := session.Get("session", ctx)
 
-	fmt.Println(sess.Values["user_id"])
-	fmt.Println(sess.Values["user_name"])
-	fmt.Println(sess.Values["user_email"])
-	fmt.Println(sess.Values["token"])
+	// fmt.Println(sess.Values["user_id"])
+	// fmt.Println(sess.Values["user_name"])
+	// fmt.Println(sess.Values["user_email"])
+	// fmt.Println(sess.Values["token"])
 
-	viewData := map[string]interface{}{}
-	return helper.View(ctx, "layout.html", "auth/login.html", viewData)
+	viewData := map[string]interface{}{
+		"Year": time.Now().Year(),
+	}
+	return helper.View(ctx, "auth/layout.html", "auth/login.html", viewData)
 }
 
 func (handler *authHandler) Login(ctx echo.Context) error {

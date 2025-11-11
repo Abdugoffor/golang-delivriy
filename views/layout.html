@@ -5,44 +5,201 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ if .Title }}{{ .Title }} | {{ end }}My Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background-color: #f5f7fa;
+            font-family: "Inter", sans-serif;
+            overflow: hidden;
+        }
+
+        /* === LAYOUT CONTAINER === */
+        .app-wrapper {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            background: linear-gradient(180deg, #0d6efd 0%, #003566 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar .brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin: 2px 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .sidebar hr {
+            border-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* === MAIN CONTENT === */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 250px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f8f9fb;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-wrapper {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .main-header {
+            border-bottom: 1px solid #e3e6eb;
+            padding: 20px 30px;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        footer {
+            background: white;
+            border-top: 1px solid #e3e6eb;
+            padding: 10px 0;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 991px) {
+            .sidebar {
+                left: -250px;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: inline-block;
+                cursor: pointer;
+                margin-right: 15px;
+            }
+        }
+    </style>
 </head>
 
-<body class="bg-light">
-
-    <div class="d-flex min-vh-100">
-
+<body>
+    <div class="app-wrapper">
         <!-- Sidebar -->
-        <aside class="bg-dark text-light flex-shrink-0 p-3" style="width: 250px;">
-            <div class="d-flex align-items-center mb-3">
-                <i class="ph ph-storefront text-warning fs-3 me-2"></i>
-                <span class="fs-4 fw-bold">My Shop</span>
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <i class="ph ph-storefront text-warning fs-3 me-2"></i> My Shop
             </div>
+
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
-                    <a href="/api/v1/admin/product" class="nav-link {{ if eq .Active "product" }}active{{ else
-                        }}text-light{{ end }}">
+                    <a href="/api/v1/admin/product" class="nav-link">
                         <i class="ph ph-package me-2"></i> Products
                     </a>
                 </li>
                 <li>
-                    <a href="/api/v1/admin/category" class="nav-link {{ if eq .Active "IsActive" }}active{{ else
-                        }}text-light{{ end }}">
-                        <i class="ph ph-trash me-2"></i> Categories
+                    <a href="/api/v1/admin/category" class="nav-link">
+                        <i class="ph ph-folders me-2"></i> Categories
                     </a>
                 </li>
             </ul>
+
             <hr>
-            <div class="text-center text-muted small">© 2025 My Shop</div>
+            <div class="sidebar-footer">© 2025 My Shop</div>
         </aside>
 
         <!-- Main content -->
-        <main class="flex-grow-1 p-4">
-            {{ template "content" . }}
-        </main>
+        <div class="main-content">
+            <div class="main-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <span class="menu-toggle d-lg-none" onclick="toggleSidebar()">
+                        <i class="ph ph-list fs-3 text-primary"></i>
+                    </span>
+                    <h4 class="fw-semibold text-primary mb-0">{{ .Title }}</h4>
+                </div>
+            </div>
 
+            <div class="content-wrapper">
+                {{ template "content" . }}
+            </div>
+
+            <footer>
+                Built with using Go & Bootstrap
+            </footer>
+        </div>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
