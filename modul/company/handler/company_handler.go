@@ -86,7 +86,6 @@ func (handler *companyHandler) All(ctx echo.Context) error {
 			}
 		}
 
-		
 		tx = tx.Joins("JOIN company_user_roles ON company_user_roles.company_id = company.id").
 			Where("company_user_roles.user_id = ?", user["id"]).
 			Group("company.id").
@@ -104,13 +103,13 @@ func (handler *companyHandler) All(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, data)
 
-	// viewData := map[string]interface{}{
-	// 	"models": data.Data,
-	// 	"Meta":   data.Meta,
-	// 	"Filter": query,
-	// }
+	viewData := map[string]interface{}{
+		"models": data.Data,
+		"Meta":   data.Meta,
+		"Filter": query,
+	}
 
-	// return helper.View(ctx, "layout.html", "company/index.html", viewData)
+	return helper.View(ctx, "layout.html", "company/index.html", viewData)
 }
 
 func (handler *companyHandler) Show(ctx echo.Context) error {

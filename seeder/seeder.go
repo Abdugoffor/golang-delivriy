@@ -1,5 +1,7 @@
 package seeder
 
+import "my-project/config"
+
 func DBSeed() {
 	// ProductSeeder()
 	UserSeeder()
@@ -7,4 +9,5 @@ func DBSeed() {
 	CompanySeeder()
 	CompanyUserRoleSeeder()
 	CategorySeeder()
+	SeedAppData(config.DB)
 }

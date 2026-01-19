@@ -69,6 +69,7 @@ func (service *categoryService) Create(ctx echo.Context, req category_dto.Create
 	{
 		model.Name = req.Name
 		model.Slug = helper.Slug(req.Name)
+		model.CompanyID = 1
 		model.IsActive = req.IsActive
 
 		if err := service.db.Create(&model).Error; err != nil {

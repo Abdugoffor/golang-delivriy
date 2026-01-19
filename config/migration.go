@@ -2,6 +2,7 @@ package config
 
 import (
 	"log"
+	app_model "my-project/modul/app/model"
 	category_model "my-project/modul/category/model"
 	company_model "my-project/modul/company/model"
 	product_model "my-project/modul/product/model"
@@ -17,6 +18,12 @@ func RunMigrations() {
 		&user_model.CompanyUserRole{}, // 5️⃣ many-to-many bog‘lanma
 
 		&product_model.Product{},
+		&app_model.AppCategory{},
+		&app_model.AppPage{},
+		&app_model.AppForm{},
+		&app_model.AppOption{},
+		&app_model.App{},
+		&app_model.AppValue{},
 	}
 
 	err := DB.AutoMigrate(models...)
