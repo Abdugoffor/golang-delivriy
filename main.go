@@ -5,6 +5,7 @@ import (
 	"my-project/config"
 	"my-project/helper"
 	"my-project/middleware"
+	app_cmd "my-project/modul/app"
 	auth_cmd "my-project/modul/auth"
 	category_dto "my-project/modul/category"
 	company_cmd "my-project/modul/company"
@@ -30,6 +31,7 @@ func main() {
 	auth_cmd.Cmd(route, config.DB, log.Default())
 	company_cmd.Cmd(route, config.DB, log.Default())
 	category_dto.Cmd(route, config.DB, log.Default())
+	app_cmd.Cmd(route, config.DB, log.Default())
 
 	route.Logger.Fatal(route.Start(":" + helper.ENV("HTTP_PORT")))
 

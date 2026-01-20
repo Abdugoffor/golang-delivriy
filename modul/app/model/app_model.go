@@ -15,3 +15,7 @@ type App struct {
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
+
+func (App) TableName() string {
+	return "apps"
+}
