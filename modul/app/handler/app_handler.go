@@ -61,7 +61,7 @@ func (handler *AppHandler) All(ctx echo.Context) error {
 }
 
 func (handler *AppHandler) Page(ctx echo.Context) error {
-	req := request.Request(ctx) // bu yerda ID va boshqalar bo‘lsa ham bo‘ladi
+	req := request.Request(ctx)
 
 	filter := func(tx *gorm.DB) *gorm.DB {
 		return tx.
