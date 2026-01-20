@@ -2,7 +2,10 @@ package app_handler
 
 import (
 	"log"
+	"my-project/helper"
+	app_dto "my-project/modul/app/dto"
 	app_service "my-project/modul/app/service"
+	"net/http"
 
 	"github.com/Abdugoffor/echo-crud-pg/request"
 	"github.com/labstack/echo/v4"
@@ -27,6 +30,8 @@ func NewAppHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) {
 		route.GET("", handler.All)
 		route.GET("/page", handler.Page)
 		route.GET("/:id", handler.Show)
+		route.POST("", handler.Create)
+		route.POST("/create", handler.CreateCate)
 	}
 }
 
@@ -47,7 +52,7 @@ func (handler *AppHandler) All(ctx echo.Context) error {
 			) as app_category
 		`).Joins("JOIN app_categories ON app_categories.id = apps.app_category_id")
 
-		return tx
+		return tx.Order("apps.id DESC")
 	}
 
 	data, err := handler.service.All(req.Context(), req.NewPaginate(), filter)
@@ -238,4 +243,49 @@ func (handler *AppHandler) Show(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(200, data)
+}
+
+func (handler *AppHandler) Create(ctx echo.Context) error {
+	var req app_dto.Create
+	{
+		if err := ctx.Bind(&req); err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+		}
+	}
+
+	if err := helper.ValidateStruct(&req); err != nil {
+		return ctx.JSON(400, map[string]any{
+			"error": err.Error(),
+		})
+	}
+	data, err := handler.service.Create(ctx, req)
+	{
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, data)
+}
+func (handler *AppHandler) CreateCate(ctx echo.Context) error {
+	var req app_dto.CreateCate
+	{
+		if err := ctx.Bind(&req); err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+		}
+	}
+
+	if err := helper.ValidateStruct(&req); err != nil {
+		return ctx.JSON(400, map[string]any{
+			"error": err.Error(),
+		})
+	}
+	data, err := handler.service.CreateCate(ctx, req)
+	{
+		if err != nil {
+			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		}
+	}
+
+	return ctx.JSON(http.StatusOK, data)
 }
