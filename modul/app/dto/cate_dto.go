@@ -18,3 +18,10 @@ type AppCateResponse struct {
 	UpdatedAt string          `json:"updated_at"`
 	DeletedAt string          `json:"deleted_at"`
 }
+
+type CateFilter struct {
+	Search   string `query:"search"`
+	Name     string `query:"name"`
+	Slug     string `query:"slug"`
+	IsActive string `query:"is_active"`
+}

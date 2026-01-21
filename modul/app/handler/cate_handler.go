@@ -2,6 +2,7 @@ package app_handler
 
 import (
 	"log"
+	app_dto "my-project/modul/app/dto"
 	app_service "my-project/modul/app/service"
 	"net/http"
 	"strconv"
@@ -32,10 +33,17 @@ func NewAppCateHandler(gorm *echo.Group, db *gorm.DB, log *log.Logger) {
 }
 
 func (handler *CateHandler) All(ctx echo.Context) error {
+	var filterReq app_dto.CateFilter
+	{
+		if err := ctx.Bind(&filterReq); err != nil {
+			return ctx.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+		}
+	}
+
 	req := request.Request(ctx)
 
 	filter := func(tx *gorm.DB) *gorm.DB {
-		return tx.
+		tx = tx.
 			Select(`
 			
 			app_categories.id AS id,
@@ -107,8 +115,41 @@ func (handler *CateHandler) All(ctx echo.Context) error {
 				ON ap.app_category_id = app_categories.id
 				AND ap.deleted_at IS NULL
 		`).
-			Where(`app_categories.deleted_at IS NULL`).
-			Group(`
+			Where(`app_categories.deleted_at IS NULL`)
+
+		// 🔍 SEARCH
+		if filterReq.Search != "" {
+			like := "%" + filterReq.Search + "%"
+			tx = tx.Where(`
+				app_categories.name ILIKE ? OR
+				app_categories.slug ILIKE ? OR
+				CAST(app_categories.id AS TEXT) ILIKE ? OR
+				ap.name ILIKE ? OR
+				ap.slug ILIKE ?
+			`, like, like, like, like, like)
+		}
+
+		// 🔍 Name bo‘yicha filter
+		if filterReq.Name != "" {
+			tx = tx.Where("app_categories.name ILIKE ?", "%"+filterReq.Name+"%")
+		}
+
+		// 🔍 Slug bo‘yicha filter
+		if filterReq.Slug != "" {
+			tx = tx.Where("app_categories.slug ILIKE ?", "%"+filterReq.Slug+"%")
+		}
+
+		// 🔍 is_active filter
+		if filterReq.IsActive != "" {
+			switch filterReq.IsActive {
+			case "1", "true", "TRUE":
+				tx = tx.Where("app_categories.is_active = TRUE")
+			case "0", "false", "FALSE":
+				tx = tx.Where("app_categories.is_active = FALSE")
+			}
+		}
+
+		tx.Group(`
 			app_categories.id,
 			app_categories.name,
 			app_categories.slug,
@@ -117,6 +158,7 @@ func (handler *CateHandler) All(ctx echo.Context) error {
 			app_categories.updated_at,
 			app_categories.deleted_at
 		`)
+		return tx
 	}
 
 	data, err := handler.service.All(req.Context(), req.NewPaginate(), filter)
