@@ -2,6 +2,7 @@ package helper
 
 import (
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
@@ -18,6 +19,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
+
+// ViewFS — embed qilingan views FS. main.go da o'rnatiladi.
+var ViewFS fs.FS
 
 func LoadEnv() {
 	if err := godotenv.Load(); err != nil {
@@ -162,22 +166,42 @@ var templateFuncs = template.FuncMap{
 }
 
 func View(ctx echo.Context, layoutName, viewName string, data map[string]interface{}) error {
-
 	data["Query"] = ctx.QueryParams()
 	data["Path"] = ctx.Request().URL.Path
 	data["Context"] = ctx
 
-	tmpl, err := template.New("layout").Funcs(templateFuncs).ParseFiles(
-		"views/"+layoutName,
-		"views/"+viewName,
+	var (
+		tmpl *template.Template
+		err  error
 	)
-	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Template error: "+err.Error())
-	}
 
-	if components, _ := filepath.Glob("views/components/*.html"); len(components) > 0 {
-		if tmpl, err = tmpl.ParseFiles(components...); err != nil {
-			return ctx.String(http.StatusInternalServerError, "Component error: "+err.Error())
+	if ViewFS != nil {
+		// Embedded mode (production exe)
+		tmpl, err = template.New("layout").Funcs(templateFuncs).ParseFS(ViewFS,
+			"views/"+layoutName,
+			"views/"+viewName,
+		)
+		if err != nil {
+			return ctx.String(http.StatusInternalServerError, "Template error: "+err.Error())
+		}
+		if components, _ := fs.Glob(ViewFS, "views/components/*.html"); len(components) > 0 {
+			if tmpl, err = tmpl.ParseFS(ViewFS, components...); err != nil {
+				return ctx.String(http.StatusInternalServerError, "Component error: "+err.Error())
+			}
+		}
+	} else {
+		// Dev mode (reads from disk)
+		tmpl, err = template.New("layout").Funcs(templateFuncs).ParseFiles(
+			"views/"+layoutName,
+			"views/"+viewName,
+		)
+		if err != nil {
+			return ctx.String(http.StatusInternalServerError, "Template error: "+err.Error())
+		}
+		if components, _ := filepath.Glob("views/components/*.html"); len(components) > 0 {
+			if tmpl, err = tmpl.ParseFiles(components...); err != nil {
+				return ctx.String(http.StatusInternalServerError, "Component error: "+err.Error())
+			}
 		}
 	}
 
