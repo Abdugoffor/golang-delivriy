@@ -15,11 +15,13 @@ type Update struct {
 	Price int64  `json:"price" query:"price" form:"price"`
 }
 type Filter struct {
-	Name   string `json:"name" query:"name" form:"name"`
-	Price  int64  `json:"price" query:"price" form:"price"`
-	Status string `json:"status" query:"status" form:"status"`
-	Sort   string `json:"sort" query:"sort" form:"sort"`
-	Column string `json:"column" query:"column" form:"column"`
+	ID       int64  `json:"id" query:"id" form:"id"`
+	Name     string `json:"name" query:"name" form:"name"`
+	Price    int64  `json:"price" query:"price" form:"price"`
+	Status   string `json:"status" query:"status" form:"status"`
+	IsActive string `json:"is_active" query:"is_active" form:"is_active"`
+	Sort     string `json:"sort" query:"sort" form:"sort"`
+	Column   string `json:"column" query:"column" form:"column"`
 }
 
 type Response struct {

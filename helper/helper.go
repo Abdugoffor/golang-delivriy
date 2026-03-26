@@ -4,8 +4,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,6 +90,9 @@ var templateFuncs = template.FuncMap{
 	"sub": func(a, b int) int {
 		return a - b
 	},
+	"rowNum": func(page, perPage, index int) int {
+		return (page-1)*perPage + index + 1
+	},
 	"seq": func(start, end int, current int) []int {
 		var pages []int
 		window := 2
@@ -120,6 +126,25 @@ var templateFuncs = template.FuncMap{
 	"safeHTML": func(s string) template.HTML {
 		return template.HTML(s)
 	},
+	"hasPrefix": func(s, prefix string) bool {
+		return strings.HasPrefix(s, prefix)
+	},
+	"queryWithPage": func(query url.Values, page int) string {
+		q := url.Values{}
+		for k, v := range query {
+			if k != "page" {
+				q[k] = v
+			}
+		}
+		q.Set("page", strconv.Itoa(page))
+		return "?" + q.Encode()
+	},
+	"filterURL": func(base string, query url.Values) string {
+		if len(query) == 0 {
+			return base
+		}
+		return base + "?" + query.Encode()
+	},
 
 	// ← AuthUser helper
 	"AuthUser": func(ctx echo.Context) map[string]interface{} {
@@ -142,15 +167,18 @@ func View(ctx echo.Context, layoutName, viewName string, data map[string]interfa
 	data["Path"] = ctx.Request().URL.Path
 	data["Context"] = ctx
 
-	tmpl, err := template.New("layout").
-		Funcs(templateFuncs).
-		ParseFiles(
-			"views/"+layoutName,
-			"views/"+viewName,
-			"views/components/pagination.html",
-		)
+	tmpl, err := template.New("layout").Funcs(templateFuncs).ParseFiles(
+		"views/"+layoutName,
+		"views/"+viewName,
+	)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Template parsing error: "+err.Error())
+		return ctx.String(http.StatusInternalServerError, "Template error: "+err.Error())
+	}
+
+	if components, _ := filepath.Glob("views/components/*.html"); len(components) > 0 {
+		if tmpl, err = tmpl.ParseFiles(components...); err != nil {
+			return ctx.String(http.StatusInternalServerError, "Component error: "+err.Error())
+		}
 	}
 
 	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTMLCharsetUTF8)

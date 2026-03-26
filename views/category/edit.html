@@ -1,12 +1,53 @@
 {{ define "content" }}
-<h3 class="mb-4">Edit</h3>
+<div class="breadcrumb-custom">
+    <a href="/api/v1/admin/product"><i class="ph ph-house"></i></a>
+    <span class="sep">/</span>
+    <a href="/api/v1/admin/category">Категории</a>
+    <span class="sep">/</span>
+    <a href="/api/v1/admin/category/{{ .model.ID }}">{{ .model.Name }}</a>
+    <span class="sep">/</span>
+    <span class="current">Редактировать</span>
+</div>
 
-<form action="/api/v1/admin/category/{{ .model.ID }}" method="POST" class="card p-4 shadow-sm">
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input type="text" name="name" value="{{ .model.Name }}" class="form-control" required>
+<div style="max-width:560px">
+    <div class="card">
+        <div class="card-header-clean">
+            <div style="display:flex;align-items:center;gap:8px">
+                <i class="ph ph-pencil-simple" style="color:#f59e0b;font-size:1.2rem"></i>
+                <h5>Редактировать категорию</h5>
+            </div>
+            <span style="font-size:0.78rem;color:var(--muted);font-family:monospace">ID: {{ .model.ID }}</span>
+        </div>
+        <div class="card-body-clean">
+            <form action="/api/v1/admin/category/{{ .model.ID }}" method="POST">
+                <div class="field-group">
+                    <label class="field-label" for="name">Название <span style="color:#ef4444">*</span></label>
+                    <input type="text" id="name" name="name" class="field-input"
+                           value="{{ .model.Name }}" required autofocus>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Статус</label>
+                    <div class="toggle-wrapper">
+                        <label class="toggle">
+                            <input type="checkbox" name="is_active" value="true"
+                                   {{ if .model.IsActive }}checked{{ end }}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Активна</span>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+                    <button type="submit" class="btn-primary-custom" style="background:#f59e0b">
+                        <i class="ph ph-floppy-disk"></i> Обновить
+                    </button>
+                    <a href="/api/v1/admin/category/{{ .model.ID }}" class="btn-ghost">
+                        <i class="ph ph-x"></i> Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-    <button type="submit" class="btn btn-warning text-white">Update</button>
-    <a href="/api/v1/admin/category" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 {{ end }}

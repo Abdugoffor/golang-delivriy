@@ -24,14 +24,18 @@ func NewHistoryService(db *gorm.DB) HistoryService {
 func (service *historyService) All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[history_dto.Response], error) {
 	var models []history_model.History
 
-	res, err := helper.Paginate(ctx, service.db.Scopes(filter), &models, 5)
-	if err != nil {
-		return helper.PaginatedResponse[history_dto.Response]{}, err
+	res, err := helper.Paginate(ctx, service.db.Scopes(filter).Order("id DESC"), &models, 5)
+	{
+		if err != nil {
+			return helper.PaginatedResponse[history_dto.Response]{}, err
+		}
 	}
 
 	var data []history_dto.Response
-	for _, model := range models {
-		data = append(data, history_dto.ToResponse(model))
+	{
+		for _, model := range models {
+			data = append(data, history_dto.ToResponse(model))
+		}
 	}
 
 	return helper.PaginatedResponse[history_dto.Response]{

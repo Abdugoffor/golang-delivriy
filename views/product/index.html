@@ -1,147 +1,179 @@
 {{ define "content" }}
-<div class="card shadow-lg border-0 rounded-4">
-    <div class="card-body p-4">
+{{ $back := filterURL "/api/v1/admin/product" .Query }}
+<div class="breadcrumb-custom">
+    <a href="/api/v1/admin/product"><i class="ph ph-house"></i></a>
+    <span class="sep">/</span>
+    <span class="current">Товары</span>
+</div>
 
-        <!-- Header -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
-            <h1 class="h4 fw-bold text-primary mb-3 mb-md-0">
-                Product
-            </h1>
-            <a href="/api/v1/admin/product/create" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-                Create
-            </a>
+<div class="card" style="overflow:hidden">
+    <div class="card-header-clean">
+        <div style="display:flex;align-items:center;gap:8px">
+            <i class="ph ph-package" style="color:var(--primary);font-size:1.2rem"></i>
+            <h5>Все товары</h5>
+            <span style="background:#eef2ff;color:var(--primary);font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:20px">{{ .Meta.Total }}</span>
         </div>
+        <a href="/api/v1/admin/product/create" class="btn-primary-custom">
+            <i class="ph ph-plus"></i> Добавить
+        </a>
+    </div>
 
-        <!-- Search form -->
-        <form method="GET" class="row g-2 mb-3 align-items-end">
-            <div class="col-md">
-                <input type="text" name="name" placeholder="Name" value="{{ .Filter.Name }}"
-                    class="form-control rounded-3">
-            </div>
-            <div class="col-md-3">
-                <input type="number" name="price" placeholder="Price" value="{{ .Filter.Price }}"
-                    class="form-control rounded-3">
-            </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select rounded-3">
-                    <option value="" {{ if eq .Filter.Status "" }}selected{{ end }}>ALL</option>
-                    <option value="open" {{ if eq .Filter.Status "open" }}selected{{ end }}>OPEN</option>
-                    <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>DELETED</option>
-                </select>
-            </div>
-
+    <div style="overflow-x:auto">
+        <form method="GET" id="search-form">
             <input type="hidden" name="column" value="{{ .Filter.Column }}">
             <input type="hidden" name="sort" value="{{ .Filter.Sort }}">
 
-            <div class="col-md-auto">
-                    <button type="submit" class="btn btn-primary rounded-3 px-3">
-                        <i class="ph ph-magnifying-glass"></i> Search
-                    </button>
-            </div>
-        </form>
-
-        <!-- Table -->
-        <div class="table-responsive">
-            <table class="table table-hover align-middle table-bordered shadow-sm rounded-3 overflow-hidden">
-                <thead class="table-primary text-uppercase small">
+            <table class="data-table">
+                <thead>
+                    <tr style="background:#f8fafc;border-bottom:1px solid var(--border)">
+                        <th style="width:48px"></th>
+                        <th style="width:70px">
+                            <input type="number" name="id" value="{{ .Filter.ID }}" placeholder="ID…"
+                                style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;outline:none;background:#fff">
+                        </th>
+                        <th>
+                            <input type="text" name="name" value="{{ .Filter.Name }}" placeholder="Поиск по названию…"
+                                style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;outline:none;background:#fff">
+                        </th>
+                        <th style="width:140px">
+                            <input type="number" name="price" value="{{ .Filter.Price }}" placeholder="Цена…"
+                                style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;outline:none;background:#fff">
+                        </th>
+                        <th style="width:110px;text-align:center">
+                            <select name="is_active" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;outline:none;background:#fff;cursor:pointer">
+                                <option value=""      {{ if eq .Filter.IsActive "" }}selected{{ end }}>Все</option>
+                                <option value="true"  {{ if eq .Filter.IsActive "true" }}selected{{ end }}>Активен</option>
+                                <option value="false" {{ if eq .Filter.IsActive "false" }}selected{{ end }}>Неактивен</option>
+                            </select>
+                        </th>
+                        <th style="width:110px;text-align:center">
+                            <select name="status" style="width:100%;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:0.78rem;outline:none;background:#fff;cursor:pointer">
+                                <option value=""        {{ if eq .Filter.Status "" }}selected{{ end }}>Все</option>
+                                <option value="open"    {{ if eq .Filter.Status "open" }}selected{{ end }}>Не удалён</option>
+                                <option value="deleted" {{ if eq .Filter.Status "deleted" }}selected{{ end }}>Удалён</option>
+                            </select>
+                        </th>
+                        <th style="width:130px;text-align:center">
+                            <div style="display:flex;gap:4px">
+                                <button type="submit" style="flex:1;padding:5px 6px;background:var(--primary);color:#fff;border:none;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px">
+                                    <i class="ph ph-magnifying-glass"></i> Найти
+                                </button>
+                                {{ if or .Filter.ID .Filter.Name .Filter.Price .Filter.Status .Filter.IsActive }}
+                                <a href="/api/v1/admin/product" style="flex:1;padding:5px 6px;background:#fff;color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;text-decoration:none">
+                                    <i class="ph ph-x"></i> Сброс
+                                </a>
+                                {{ end }}
+                            </div>
+                        </th>
+                    </tr>
                     <tr>
-                        <th class="text-center" width="5%">#</th>
-                        <th width="8%">
-                            <a class="text-decoration-none {{ if eq .Filter.Column "id" }}text-primary fw-bold{{ end
-                                }}" href="?column=id&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end
-                                }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}">
-                                ID
-                                {{ if eq .Filter.Column "id" }}
-                                <i class="ph {{ if eq .Filter.Sort " asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end
-                                    }}"></i>
-                                {{ end }}
+                        <th style="width:48px;text-align:center">#</th>
+                        <th style="width:70px">
+                            <a href="?column=id&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end }}&id={{ .Filter.ID }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}&is_active={{ .Filter.IsActive }}" class="sort-link {{ if eq .Filter.Column "id" }}active{{ end }}">
+                                ID {{ if eq .Filter.Column "id" }}<i class="ph {{ if eq .Filter.Sort "asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end }}"></i>{{ end }}
                             </a>
                         </th>
-                        <th width="30%">
-                            <a class="text-decoration-none {{ if eq .Filter.Column "name" }}text-primary fw-bold{{ end
-                                }}" href="?column=name&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end
-                                }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}">
-                                Name
-                                {{ if eq .Filter.Column "name" }}
-                                <i class="ph {{ if eq .Filter.Sort "asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end
-                                    }}"></i>
-                                {{ end }}
+                        <th>
+                            <a href="?column=name&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end }}&id={{ .Filter.ID }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}&is_active={{ .Filter.IsActive }}" class="sort-link {{ if eq .Filter.Column "name" }}active{{ end }}">
+                                Название {{ if eq .Filter.Column "name" }}<i class="ph {{ if eq .Filter.Sort "asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end }}"></i>{{ end }}
                             </a>
                         </th>
-                        <th width="15%">
-                            <a class="text-decoration-none {{ if eq .Filter.Column "price" }}text-primary fw-bold{{ end
-                                }}" href="?column=price&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end
-                                }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}">
-                                Price
-                                {{ if eq .Filter.Column "price" }}
-                                <i class="ph {{ if eq .Filter.Sort " asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end
-                                    }}"></i>
-                                {{ end }}
+                        <th style="width:140px">
+                            <a href="?column=price&sort={{ if eq .Filter.Sort "asc" }}desc{{ else }}asc{{ end }}&id={{ .Filter.ID }}&name={{ .Filter.Name }}&price={{ .Filter.Price }}&status={{ .Filter.Status }}&is_active={{ .Filter.IsActive }}" class="sort-link {{ if eq .Filter.Column "price" }}active{{ end }}">
+                                Цена {{ if eq .Filter.Column "price" }}<i class="ph {{ if eq .Filter.Sort "asc" }}ph-arrow-up{{ else }}ph-arrow-down{{ end }}"></i>{{ end }}
                             </a>
                         </th>
-                        <th width="15%" class="text-center">Deleted</th>
-                        <th width="15%" class="text-center">Actions</th>
+                        <th style="width:110px;text-align:center">Статус</th>
+                        <th style="width:110px;text-align:center">Удалён</th>
+                        <th style="width:130px;text-align:center">Действия</th>
                     </tr>
                 </thead>
-                <tbody class="small">
-                    {{ range $index, $p := .models }}
-                    <tr class="{{ if ne $p.DeletedAt "" }}table-danger{{ end }}">
-                        <td class="text-center">{{ add $index 1 }}</td>
-                        <td>{{ $p.ID }}</td>
-                        <td>{{ $p.Name }}</td>
-                        <td>${{ $p.Price }}</td>
-                        <td class="text-center text-muted">
-                            {{ if $p.DeletedAt }}{{ $p.DeletedAt }}{{ else }}—{{ end }}
+                <tbody>
+                    {{ range $i, $p := .models }}
+                    <tr class="{{ if ne $p.DeletedAt "" }}row-deleted{{ end }}">
+                        <td style="text-align:center;color:var(--muted);font-size:0.78rem">{{ rowNum $.Meta.CurrentPage $.Meta.PerPage $i }}</td>
+                        <td style="color:var(--muted);font-size:0.82rem">{{ $p.ID }}</td>
+                        <td>
+                            <span style="font-weight:600;color:var(--text)">{{ $p.Name }}</span>
+                            <div style="font-size:0.75rem;color:var(--muted);font-family:monospace">{{ $p.Slug }}</div>
                         </td>
-                        <td class="text-center">
-                            <div class="d-flex justify-content-center gap-2">
-
+                        <td style="font-weight:600;color:var(--text)">
+                            {{ $p.Price }} <span style="font-size:0.75rem;font-weight:400;color:var(--muted)">UZS</span>
+                        </td>
+                        <td style="text-align:center">
+                            {{ if $p.IsActive }}
+                            <span class="badge-active"><i class="ph ph-check-circle"></i> Активен</span>
+                            {{ else }}
+                            <span class="badge-inactive"><i class="ph ph-minus-circle"></i> Неактивен</span>
+                            {{ end }}
+                        </td>
+                        <td style="text-align:center">
+                            {{ if $p.DeletedAt }}
+                            <span class="badge-deleted"><i class="ph ph-trash"></i> {{ $p.DeletedAt }}</span>
+                            {{ else }}
+                            <span style="color:var(--muted);font-size:0.82rem">—</span>
+                            {{ end }}
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:4px;justify-content:center">
                                 {{ if ne $p.DeletedAt "" }}
-                                <form action="/api/v1/admin/product/{{ $p.ID }}/restore" method="post">
-                                    <button type="submit" class="btn btn-sm btn-outline-success rounded-circle"
-                                        title="Restore">
-                                        <i class="ph ph-arrow-counter-clockwise"></i>
-                                    </button>
-                                </form>
-                                <form action="/api/v1/admin/product/{{ $p.ID }}/force" method="post">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
-                                        title="Delete permanently"
-                                        onclick="return confirm('This will permanently delete the product. Continue?')">
-                                        <i class="ph ph-x"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="action-btn restore" title="Восстановить"
+                                    onclick="postAction('/api/v1/admin/product/{{ $p.ID }}/restore', '{{ $back }}')">
+                                    <i class="ph ph-arrow-counter-clockwise"></i>
+                                </button>
+                                <a href="/api/v1/admin/product/{{ $p.ID }}/history" class="action-btn" title="История" style="color:#6366f1">
+                                    <i class="ph ph-clock-clockwise"></i>
+                                </a>
+                                <button type="button" class="action-btn delete" title="Удалить навсегда"
+                                    onclick="if(confirm('Удалить товар навсегда?')) postAction('/api/v1/admin/product/{{ $p.ID }}/force', '{{ $back }}')">
+                                    <i class="ph ph-trash"></i>
+                                </button>
                                 {{ else }}
-                                <a href="/api/v1/admin/product/{{ $p.ID }}"
-                                    class="btn btn-sm btn-outline-primary rounded-circle" title="View">
+                                <a href="/api/v1/admin/product/{{ $p.ID }}" class="action-btn view" title="Просмотр">
                                     <i class="ph ph-eye"></i>
                                 </a>
-                                <a href="/api/v1/admin/product/{{ $p.ID }}/edit"
-                                    class="btn btn-sm btn-outline-warning rounded-circle" title="Edit">
-                                    <i class="ph ph-pencil"></i>
+                                <a href="/api/v1/admin/product/{{ $p.ID }}/edit" class="action-btn edit" title="Редактировать">
+                                    <i class="ph ph-pencil-simple"></i>
                                 </a>
-                                <form action="/api/v1/admin/product/{{ $p.ID }}/delete" method="post">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle"
-                                        title="Delete">
-                                        <i class="ph ph-trash"></i>
-                                    </button>
-                                </form>
+                                <a href="/api/v1/admin/product/{{ $p.ID }}/history" class="action-btn" title="История" style="color:#6366f1">
+                                    <i class="ph ph-clock-clockwise"></i>
+                                </a>
+                                <button type="button" class="action-btn delete" title="Удалить"
+                                    onclick="postAction('/api/v1/admin/product/{{ $p.ID }}/delete', '{{ $back }}')">
+                                    <i class="ph ph-trash"></i>
+                                </button>
                                 {{ end }}
                             </div>
                         </td>
                     </tr>
                     {{ else }}
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-3">No products found 😔</td>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="ph ph-package"></i>
+                                <p>Нет товаров</p>
+                            </div>
+                        </td>
                     </tr>
                     {{ end }}
                 </tbody>
             </table>
-        </div>
-        <!-- Pagination -->
-        <div class="mt-2">
-            {{ template "pagination" . }}
-        </div>
-
+        </form>
     </div>
+
+    {{ template "pagination" . }}
 </div>
+
+<script>
+function postAction(action, back) {
+    var f = document.createElement('form');
+    f.method = 'POST';
+    f.action = action;
+    var b = document.createElement('input');
+    b.type = 'hidden'; b.name = '_back'; b.value = back;
+    f.appendChild(b);
+    document.body.appendChild(f);
+    f.submit();
+}
+</script>
 {{ end }}

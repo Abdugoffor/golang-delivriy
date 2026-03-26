@@ -1,0 +1,82 @@
+{{ define "content" }}
+<div class="breadcrumb-custom">
+    <a href="/api/v1/admin/product"><i class="ph ph-house"></i></a>
+    <span class="sep">/</span>
+    <a href="/api/v1/admin/product">Товары</a>
+    <span class="sep">/</span>
+    <a href="/api/v1/admin/product/{{ .model.ID }}">{{ .model.Name }}</a>
+    <span class="sep">/</span>
+    <span class="current">История</span>
+</div>
+
+<div class="card" style="overflow:hidden">
+    <div class="card-header-clean">
+        <div style="display:flex;align-items:center;gap:8px">
+            <i class="ph ph-clock-clockwise" style="color:var(--primary);font-size:1.2rem"></i>
+            <h5>История изменений</h5>
+            <span style="background:#eef2ff;color:var(--primary);font-size:0.75rem;font-weight:700;padding:2px 8px;border-radius:20px">{{ .Meta.Total }}</span>
+        </div>
+        <a href="/api/v1/admin/product/{{ .model.ID }}" class="btn-ghost">
+            <i class="ph ph-arrow-left"></i> Назад
+        </a>
+    </div>
+
+    <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width:48px;text-align:center">#</th>
+                    <th style="width:110px">Действие</th>
+                    <th>Старое значение</th>
+                    <th>Новое значение</th>
+                    <th style="width:130px">IP</th>
+                    <th style="width:75px;text-align:center">Метод</th>
+                    <th style="width:170px">Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range $i, $h := .models }}
+                <tr>
+                    <td style="text-align:center;color:var(--muted);font-size:0.78rem">{{ rowNum $.Meta.CurrentPage $.Meta.PerPage $i }}</td>
+                    <td>
+                        {{ if eq $h.Action "create" }}
+                        <span style="background:#dcfce7;color:#166534;font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:20px">{{ $h.Action }}</span>
+                        {{ else if eq $h.Action "update" }}
+                        <span style="background:#fef9c3;color:#854d0e;font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:20px">{{ $h.Action }}</span>
+                        {{ else if eq $h.Action "delete" }}
+                        <span style="background:#fee2e2;color:#991b1b;font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:20px">{{ $h.Action }}</span>
+                        {{ else if eq $h.Action "restore" }}
+                        <span style="background:#dbeafe;color:#1e40af;font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:20px">{{ $h.Action }}</span>
+                        {{ else }}
+                        <span style="background:#f1f5f9;color:var(--muted);font-size:0.75rem;font-weight:700;padding:3px 8px;border-radius:20px">{{ $h.Action }}</span>
+                        {{ end }}
+                    </td>
+                    <td style="max-width:220px">
+                        <div style="font-family:monospace;font-size:0.76rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ $h.OldValue }}">{{ $h.OldValue }}</div>
+                    </td>
+                    <td style="max-width:220px">
+                        <div style="font-family:monospace;font-size:0.76rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ $h.NewValue }}">{{ $h.NewValue }}</div>
+                    </td>
+                    <td style="font-size:0.82rem;color:var(--muted);font-family:monospace">{{ $h.IP }}</td>
+                    <td style="text-align:center">
+                        <span style="background:#f1f5f9;color:var(--muted);font-size:0.72rem;font-weight:700;padding:2px 7px;border-radius:4px;font-family:monospace">{{ $h.Method }}</span>
+                    </td>
+                    <td style="font-size:0.82rem;color:var(--muted)">{{ $h.CreatedAt }}</td>
+                </tr>
+                {{ else }}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="ph ph-clock-clockwise"></i>
+                            <p>Нет истории</p>
+                        </div>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+
+    {{ template "pagination" . }}
+</div>
+{{ end }}
