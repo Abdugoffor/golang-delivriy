@@ -127,7 +127,7 @@ func (handler *categoryHandler) History(ctx echo.Context) error {
 
 	historyFilter := func(tx *gorm.DB) *gorm.DB {
 		// return tx
-		return tx.Where("table_name = ? AND row_id = ?", "categories", id).Order("id DESC")
+		return tx.Where("table_name = ? AND row_id = ?", "categories", id)
 	}
 
 	data, err := handler.historyService.All(ctx, historyFilter)
