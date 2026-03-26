@@ -37,18 +37,14 @@ func (service *categoryService) All(ctx echo.Context, filter func(tx *gorm.DB) *
 		}
 	}
 
-	var data []category_dto.Response
+	data := make([]category_dto.Response, len(models))
 	{
-		for _, model := range models {
-			data = append(data, category_dto.ToResponse(model))
+		for i, model := range models {
+			data[i] = category_dto.ToResponse(model)
 		}
 	}
 
-	return helper.PaginatedResponse[category_dto.Response]{
-		Data: data,
-		Meta: res.Meta,
-	}, nil
-
+	return helper.PaginatedResponse[category_dto.Response]{Data: data, Meta: res.Meta}, nil
 }
 
 func (service *categoryService) Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (category_dto.Response, error) {
@@ -59,27 +55,22 @@ func (service *categoryService) Show(ctx echo.Context, filter func(tx *gorm.DB) 
 		}
 	}
 
-	res := category_dto.ToResponse(model)
-
-	return res, nil
+	return category_dto.ToResponse(model), nil
 }
 
 func (service *categoryService) Create(ctx echo.Context, req category_dto.Create) (category_dto.Response, error) {
-	var model category_model.Category
-	{
-		model.Name = req.Name
-		model.Slug = helper.Slug(req.Name)
-		model.CompanyID = 1
-		model.IsActive = req.IsActive
-
-		if err := service.db.Create(&model).Error; err != nil {
-			return category_dto.Response{}, err
-		}
+	model := category_model.Category{
+		Name:      req.Name,
+		Slug:      helper.Slug(req.Name),
+		CompanyID: 1,
+		IsActive:  req.IsActive,
 	}
 
-	res := category_dto.ToResponse(model)
+	if err := service.db.Create(&model).Error; err != nil {
+		return category_dto.Response{}, err
+	}
 
-	return res, nil
+	return category_dto.ToResponse(model), nil
 }
 
 func (service *categoryService) Update(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB, req category_dto.Update) (category_dto.Response, error) {
@@ -97,9 +88,7 @@ func (service *categoryService) Update(ctx echo.Context, filter func(tx *gorm.DB
 		return category_dto.Response{}, err
 	}
 
-	res := category_dto.ToResponse(model)
-
-	return res, nil
+	return category_dto.ToResponse(model), nil
 }
 
 func (service *categoryService) Delete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
@@ -110,11 +99,7 @@ func (service *categoryService) Delete(ctx echo.Context, filter func(tx *gorm.DB
 		}
 	}
 
-	if err := service.db.Delete(&model).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return service.db.Delete(&model).Error
 }
 
 func (service *categoryService) Restore(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
@@ -125,10 +110,7 @@ func (service *categoryService) Restore(ctx echo.Context, filter func(tx *gorm.D
 		}
 	}
 
-	if err := service.db.Model(&model).Unscoped().Update("deleted_at", nil).Error; err != nil {
-		return err
-	}
-	return nil
+	return service.db.Model(&model).Unscoped().Update("deleted_at", nil).Error
 }
 
 func (service *categoryService) ForceDelete(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) error {
@@ -139,9 +121,5 @@ func (service *categoryService) ForceDelete(ctx echo.Context, filter func(tx *go
 		}
 	}
 
-	if err := service.db.Unscoped().Delete(&model).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return service.db.Unscoped().Delete(&model).Error
 }

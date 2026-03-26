@@ -1,12 +1,49 @@
 {{ define "content" }}
-<h3 class="mb-4">Add Product</h3>
+<div class="breadcrumb-custom">
+    <a href="/api/v1/admin/product"><i class="ph ph-house"></i></a>
+    <span class="sep">/</span>
+    <a href="/api/v1/admin/category">Категории</a>
+    <span class="sep">/</span>
+    <span class="current">Новая</span>
+</div>
 
-<form action="/api/v1/admin/category" method="POST" class="card p-4 shadow-sm">
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input type="text" name="name" class="form-control" required>
+<div style="max-width:560px">
+    <div class="card">
+        <div class="card-header-clean">
+            <div style="display:flex;align-items:center;gap:8px">
+                <i class="ph ph-plus-circle" style="color:var(--primary);font-size:1.2rem"></i>
+                <h5>Новая категория</h5>
+            </div>
+        </div>
+        <div class="card-body-clean">
+            <form action="/api/v1/admin/category" method="POST">
+                <div class="field-group">
+                    <label class="field-label" for="name">Название <span style="color:#ef4444">*</span></label>
+                    <input type="text" id="name" name="name" class="field-input"
+                           placeholder="Например: Электроника, Одежда…" required autofocus>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Статус</label>
+                    <div class="toggle-wrapper">
+                        <label class="toggle">
+                            <input type="checkbox" name="is_active" value="true" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Активна</span>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="ph ph-floppy-disk"></i> Сохранить
+                    </button>
+                    <a href="/api/v1/admin/category" class="btn-ghost">
+                        <i class="ph ph-x"></i> Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-    <button type="submit" class="btn btn-success">Save</button>
-    <a href="/api/v1/admin/category" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 {{ end }}

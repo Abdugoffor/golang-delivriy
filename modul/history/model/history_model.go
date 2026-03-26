@@ -15,3 +15,4 @@ type History struct {
 	Method    string    `json:"method" gorm:"not null;"`
 	CreatedAt time.Time `json:"created_at"`
 }
+

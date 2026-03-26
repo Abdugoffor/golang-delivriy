@@ -1,51 +1,80 @@
 {{ define "pagination" }}
-{{ $meta := .Meta }}
-{{ $query := .Query }}
-{{ $base := .Path }}
+{{ if gt .Meta.LastPage 1 }}
+<div
+    style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:#fafafa;border-radius:0 0 var(--radius) var(--radius)">
 
-{{ if gt $meta.LastPage 1 }}
-{{ $qs := "" }}
-{{ range $key, $vals := $query }}
-    {{ range $v := $vals }}
-        {{ if ne $key "page" }}
-            {{ $qs = printf "%s&%s=%s" $qs $key $v }}
-        {{ end }}
-    {{ end }}
-{{ end }}
+    <!-- INFO -->
+    <span style="font-size:0.8rem;color:var(--muted)">
+        Всего: <strong style="color:var(--text)">{{ .Meta.Total }}</strong> &nbsp;|&nbsp;
+        Страница <strong style="color:var(--text)">{{ .Meta.CurrentPage }}</strong> из {{ .Meta.LastPage }}
+    </span>
 
-<nav aria-label="Pagination" class="mt-2">
-    <ul class="pagination justify-content-center">
+    <!-- PAGINATION -->
+    <nav>
+        <ul style="display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap">
 
-        <!-- Previous -->
-        {{ if gt $meta.CurrentPage 1 }}
-        <li class="page-item">
-            <a class="page-link" href="{{ safeHTML (printf "%s?page=%d%s" $base (sub $meta.CurrentPage 1) $qs) }}">Previous</a>
-        </li>
-        {{ else }}
-        <li class="page-item disabled"><span class="page-link">Previous</span></li>
-        {{ end }}
+            <!-- PREV -->
+            {{ if gt .Meta.CurrentPage 1 }}
+            <li>
+                <a href="{{ queryWithPage .Query (sub .Meta.CurrentPage 1) }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border:1px solid var(--border);border-radius:7px;
+                           color:var(--muted);text-decoration:none;
+                           font-size:0.9rem;background:#fff;
+                           transition:all 0.15s"
+                    onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                    <i class="ph ph-caret-left"></i>
+                </a>
+            </li>
+            {{ end }}
 
-        <!-- Pages -->
-        {{ range $i := seq 1 $meta.LastPage $meta.CurrentPage }}
-        {{ if eq $i -1 }}
-        <li class="page-item disabled"><span class="page-link">...</span></li>
-        {{ else }}
-        <li class="page-item {{ if eq $meta.CurrentPage $i }}active{{ end }}">
-            <a class="page-link" href="{{ safeHTML (printf "%s?page=%d%s" $base $i $qs) }}">{{ $i }}</a>
-        </li>
-        {{ end }}
-        {{ end }}
+            <!-- NUMBERS -->
+            {{ range seq 1 .Meta.LastPage .Meta.CurrentPage }}
+            {{ if eq . -1 }}
+            <li>
+                <span style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 8px;
+                           color:var(--muted);font-size:0.85rem">
+                    …
+                </span>
+            </li>
+            {{ else }}
+            <li>
+                <a href="{{ queryWithPage $.Query . }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border-radius:7px;text-decoration:none;
+                           font-size:0.8rem;font-weight:600;
+                           transition:all 0.15s;
+                           {{ if eq . $.Meta.CurrentPage }}
+                                background:var(--primary);color:#fff;border:1px solid var(--primary)
+                           {{ else }}
+                                background:#fff;color:var(--muted);border:1px solid var(--border)
+                           {{ end }}">
+                    {{ . }}
+                </a>
+            </li>
+            {{ end }}
+            {{ end }}
 
-        <!-- Next -->
-        {{ if lt $meta.CurrentPage $meta.LastPage }}
-        <li class="page-item">
-            <a class="page-link" href="{{ safeHTML (printf "%s?page=%d%s" $base (add $meta.CurrentPage 1) $qs) }}">Next</a>
-        </li>
-        {{ else }}
-        <li class="page-item disabled"><span class="page-link">Next</span></li>
-        {{ end }}
+            <!-- NEXT -->
+            {{ if lt .Meta.CurrentPage .Meta.LastPage }}
+            <li>
+                <a href="{{ queryWithPage .Query (add .Meta.CurrentPage 1) }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border:1px solid var(--border);border-radius:7px;
+                           color:var(--muted);text-decoration:none;
+                           font-size:0.9rem;background:#fff;
+                           transition:all 0.15s"
+                    onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+                    <i class="ph ph-caret-right"></i>
+                </a>
+            </li>
+            {{ end }}
 
-    </ul>
-</nav>
+        </ul>
+    </nav>
+</div>
 {{ end }}
 {{ end }}
