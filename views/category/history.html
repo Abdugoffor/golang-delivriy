@@ -65,20 +65,10 @@
                         {{ end }}
                     </td>
                     <td style="max-width:220px">
-                        <div style="font-family:monospace;
-        font-size:0.8rem;
-        color:var(--muted);
-        white-space:pre-wrap;
-        word-break:break-word;
-        margin:0" title="{{ $h.OldValue }}">{{ $h.OldValue }}</div>
+                        <div class="historyOldValue" title="{{ $h.OldValue }}">{{ $h.OldValue }}</div>
                     </td>
                     <td style="max-width:220px">
-                        <div style="font-family:monospace;
-        font-size:0.8rem;
-        color:var(--text);
-        white-space:pre-wrap;
-        word-break:break-word;
-        margin:0" title="{{ $h.NewValue }}">{{ $h.NewValue }}</div>
+                        <div class="historyNewValue" title="{{ $h.NewValue }}">{{ $h.NewValue }}</div>
                     </td>
                     <td style="font-size:0.82rem;color:var(--muted);font-family:monospace">{{ $h.IP }}</td>
                     <td style="text-align:center">

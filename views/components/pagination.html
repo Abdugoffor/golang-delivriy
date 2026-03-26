@@ -2,16 +2,26 @@
 {{ if gt .Meta.LastPage 1 }}
 <div
     style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:#fafafa;border-radius:0 0 var(--radius) var(--radius)">
+
+    <!-- INFO -->
     <span style="font-size:0.8rem;color:var(--muted)">
         Всего: <strong style="color:var(--text)">{{ .Meta.Total }}</strong> &nbsp;|&nbsp;
         Страница <strong style="color:var(--text)">{{ .Meta.CurrentPage }}</strong> из {{ .Meta.LastPage }}
     </span>
+
+    <!-- PAGINATION -->
     <nav>
-        <ul style="display:flex;gap:4px;list-style:none;margin:0;padding:0">
+        <ul style="display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap">
+
+            <!-- PREV -->
             {{ if gt .Meta.CurrentPage 1 }}
             <li>
-                <a href="{{ queryWithPage .Query (sub .Meta.CurrentPage 1) }}"
-                    style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--border);border-radius:7px;color:var(--muted);text-decoration:none;font-size:0.9rem;transition:all 0.15s;background:#fff"
+                <a href="{{ queryWithPage .Query (sub .Meta.CurrentPage 1) }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border:1px solid var(--border);border-radius:7px;
+                           color:var(--muted);text-decoration:none;
+                           font-size:0.9rem;background:#fff;
+                           transition:all 0.15s"
                     onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
                     <i class="ph ph-caret-left"></i>
@@ -19,33 +29,50 @@
             </li>
             {{ end }}
 
+            <!-- NUMBERS -->
             {{ range seq 1 .Meta.LastPage .Meta.CurrentPage }}
             {{ if eq . -1 }}
             <li>
-                <span
-                    style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;color:var(--muted);font-size:0.85rem">…</span>
+                <span style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 8px;
+                           color:var(--muted);font-size:0.85rem">
+                    …
+                </span>
             </li>
             {{ else }}
             <li>
-                <a href="{{ queryWithPage $.Query . }}"
-                    style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;text-decoration:none;font-size:0.84rem;font-weight:600;transition:all 0.15s;
-                       {{ if eq . $.Meta.CurrentPage }}background:var(--primary);color:#fff;border:1px solid var(--primary){{ else }}background:#fff;color:var(--muted);border:1px solid var(--border){{ end }}">
+                <a href="{{ queryWithPage $.Query . }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border-radius:7px;text-decoration:none;
+                           font-size:0.8rem;font-weight:600;
+                           transition:all 0.15s;
+                           {{ if eq . $.Meta.CurrentPage }}
+                                background:var(--primary);color:#fff;border:1px solid var(--primary)
+                           {{ else }}
+                                background:#fff;color:var(--muted);border:1px solid var(--border)
+                           {{ end }}">
                     {{ . }}
                 </a>
             </li>
             {{ end }}
             {{ end }}
 
+            <!-- NEXT -->
             {{ if lt .Meta.CurrentPage .Meta.LastPage }}
             <li>
-                <a href="{{ queryWithPage .Query (add .Meta.CurrentPage 1) }}"
-                    style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--border);border-radius:7px;color:var(--muted);text-decoration:none;font-size:0.9rem;transition:all 0.15s;background:#fff"
+                <a href="{{ queryWithPage .Query (add .Meta.CurrentPage 1) }}" style="display:flex;align-items:center;justify-content:center;
+                           min-width:32px;height:32px;padding:0 10px;
+                           border:1px solid var(--border);border-radius:7px;
+                           color:var(--muted);text-decoration:none;
+                           font-size:0.9rem;background:#fff;
+                           transition:all 0.15s"
                     onmouseover="this.style.borderColor='#94a3b8';this.style.color='var(--text)'"
                     onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
                     <i class="ph ph-caret-right"></i>
                 </a>
             </li>
             {{ end }}
+
         </ul>
     </nav>
 </div>

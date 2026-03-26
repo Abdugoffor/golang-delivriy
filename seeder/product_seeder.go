@@ -43,22 +43,25 @@ var productNames = []string{
 }
 
 func ProductSeeder() {
-	for i, name := range productNames {
-		slug := helper.Slug(name)
+	for k := 0; k < 2500; k++ {
 
-		product := product_model.Product{
-			Name:      name,
-			Slug:      slug,
-			Price:     rand.Int63n(300),
-			IsActive:  true,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
+		for i, name := range productNames {
+			slug := helper.Slug(name)
 
-		if err := config.DB.Create(&product).Error; err != nil {
-			log.Printf("❌ ProductSeeder insert error: %v", err)
-		} else {
-			log.Printf("✅ (%d) Product qo‘shildi: %s", i+1, product.Name)
+			product := product_model.Product{
+				Name:      name,
+				Slug:      slug,
+				Price:     rand.Int63n(300),
+				IsActive:  true,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+
+			if err := config.DB.Create(&product).Error; err != nil {
+				log.Printf("❌ ProductSeeder insert error: %v", err)
+			} else {
+				log.Printf("✅ (%d) Product qo‘shildi: %s", i+1, product.Name)
+			}
 		}
 	}
 }

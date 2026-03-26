@@ -1,6 +1,6 @@
 package seeder
 
 func DBSeed() {
-	ProductSeeder()
-	CategorySeeder()
+	// ProductSeeder()
+	// CategorySeeder()
 }

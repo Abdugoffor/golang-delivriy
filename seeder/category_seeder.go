@@ -3,19 +3,44 @@ package seeder
 import (
 	"my-project/config"
 	category_model "my-project/modul/category/model"
+	"strings"
 )
 
 func CategorySeeder() {
-	categories := []category_model.Category{
-		{Name: "Electronics", Slug: "electronics", CompanyID: 1, IsActive: true},
-		{Name: "Clothing", Slug: "clothing", CompanyID: 2, IsActive: true},
-		{Name: "Home", Slug: "home", CompanyID: 6, IsActive: true},
-		{Name: "Beauty", Slug: "beauty", CompanyID: 3, IsActive: true},
-		{Name: "Sports", Slug: "sports", CompanyID: 4, IsActive: true},
-		{Name: "Toys", Slug: "toys", CompanyID: 5, IsActive: true},
+	names := []string{
+		"Electronics", "Clothing", "Home", "Beauty", "Sports", "Toys",
+		"Books", "Shoes", "Bags", "Accessories",
+		"Furniture", "Kitchen", "Garden", "Automotive", "Health",
+		"Food", "Drinks", "Office", "Pets", "Kids",
+		"Gadgets", "Tools", "Hardware", "Software", "Music",
+		"Movies", "Games", "Travel", "Outdoor", "Fitness",
+		"Jewelry", "Watches", "Phones", "Laptops", "Tablets",
+		"TV", "Cameras", "Printers", "Networking", "Security",
+		"Lighting", "Decor", "Art", "Craft", "Stationery",
+		"Cleaning", "Laundry", "Storage", "Baby", "Maternity",
+		"Medical", "Supplements", "Cosmetics", "Fragrance", "Haircare",
+		"Skincare", "Makeup", "Nails", "Barber", "Salon",
+		"Gym", "Yoga", "Cycling", "Running", "Hiking",
+		"Camping", "Fishing", "Hunting", "Swimming", "Diving",
+		"Winter", "Summer", "Rain", "Smart Home", "AI Devices",
+		"Drones", "Robotics", "VR", "AR", "Gaming Gear",
+		"Streaming", "Cloud", "Hosting", "Domains", "SEO",
+		"Marketing", "Finance", "Crypto", "Banking", "Insurance",
+		"Education", "Courses", "Languages", "Consulting", "Services",
 	}
 
-	for _, cat := range categories {
-		config.DB.FirstOrCreate(&cat, category_model.Category{Slug: cat.Slug, CompanyID: cat.CompanyID})
+	var categories []category_model.Category
+	for p := 0; p < 2500; p++ {
+
+		for i, name := range names {
+			categories = append(categories, category_model.Category{
+				Name:      name,
+				Slug:      strings.ToLower(strings.ReplaceAll(name, " ", "-")),
+				CompanyID: int64((i % 5) + 1),
+				IsActive:  true,
+			})
+		}
+
+		config.DB.Create(&categories)
 	}
 }
