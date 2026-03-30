@@ -28,20 +28,30 @@ func Paginate[T any](c echo.Context, db *gorm.DB, model *[]T, count int) (Pagina
 	limitStr := c.QueryParam("limit")
 
 	page, _ := strconv.Atoi(pageStr)
-	if page < 1 {
-		page = 1
+	{
+		if page < 1 {
+			page = 1
+		}
 	}
 
 	limit, _ := strconv.Atoi(limitStr)
-	if limit < 1 {
-		limit = count
+	{
+		if limit < 1 {
+			limit = count
+		}
 	}
 
 	offset := (page - 1) * limit
 
 	var total int64
-	if err := db.Model(model).Count(&total).Error; err != nil {
-		return res, err
+
+	modelType := getModelType(model)
+
+	total, err := GetCount(db, Rdb, modelType)
+	{
+		if err != nil {
+			return res, err
+		}
 	}
 
 	// 2. Fetch paginated data
@@ -72,13 +82,17 @@ func PaginateOnlyTrashed[T any](c echo.Context, db *gorm.DB, model *[]T, count i
 	limitStr := c.QueryParam("limit")
 
 	page, _ := strconv.Atoi(pageStr)
-	if page < 1 {
-		page = 1
+	{
+		if page < 1 {
+			page = 1
+		}
 	}
 
 	limit, _ := strconv.Atoi(limitStr)
-	if limit < 1 {
-		limit = count
+	{
+		if limit < 1 {
+			limit = count
+		}
 	}
 
 	offset := (page - 1) * limit
