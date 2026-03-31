@@ -1,6 +1,7 @@
 package category_dto
 
 import (
+	"encoding/json"
 	"my-project/helper"
 	category_model "my-project/modul/category/model"
 )
@@ -16,13 +17,14 @@ type Update struct {
 }
 
 type Response struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Slug      string `json:"slug"`
-	IsActive  bool   `json:"is_active"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	DeletedAt string `json:"deleted_at"`
+	ID        int64           `json:"id"`
+	Name      string          `json:"name"`
+	Slug      string          `json:"slug"`
+	IsActive  bool            `json:"is_active"`
+	CreatedAt string          `json:"created_at"`
+	UpdatedAt string          `json:"updated_at"`
+	DeletedAt string          `json:"deleted_at"`
+	Products  json.RawMessage `json:"products"`
 }
 
 type Filter struct {

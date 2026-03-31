@@ -28,23 +28,7 @@ func NewProductService(db *gorm.DB) ProductService {
 }
 
 func (service *productService) All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[product_dto.Response], error) {
-	var models []product_model.Product
-
-	res, err := helper.Paginate(ctx, service.db.Scopes(filter), &models, 10)
-	{
-		if err != nil {
-			return helper.PaginatedResponse[product_dto.Response]{}, err
-		}
-	}
-
-	data := make([]product_dto.Response, len(models))
-	{
-		for i, m := range models {
-			data[i] = product_dto.ToResponse(m)
-		}
-	}
-
-	return helper.PaginatedResponse[product_dto.Response]{Data: data, Meta: res.Meta}, nil
+	return helper.Paginate[product_model.Product, product_dto.Response](ctx, service.db.Scopes(filter), 10)
 }
 
 func (service *productService) Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (product_dto.Response, error) {

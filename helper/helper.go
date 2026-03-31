@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"encoding/json"
 	"html/template"
 	"io/fs"
 	"log"
@@ -222,4 +223,9 @@ func AuthUser(ctx echo.Context) map[string]interface{} {
 		"email": sess.Values["user_email"],
 		"token": sess.Values["token"],
 	}
+}
+func ParseJSON(data json.RawMessage) []map[string]interface{} {
+	var result []map[string]interface{}
+	_ = json.Unmarshal(data, &result)
+	return result
 }

@@ -28,23 +28,7 @@ func NewCategoryService(db *gorm.DB) CategoryService {
 }
 
 func (service *categoryService) All(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (helper.PaginatedResponse[category_dto.Response], error) {
-	var models []category_model.Category
-
-	res, err := helper.Paginate(ctx, service.db.Scopes(filter), &models, 10)
-	{
-		if err != nil {
-			return helper.PaginatedResponse[category_dto.Response]{}, err
-		}
-	}
-
-	data := make([]category_dto.Response, len(models))
-	{
-		for i, model := range models {
-			data[i] = category_dto.ToResponse(model)
-		}
-	}
-
-	return helper.PaginatedResponse[category_dto.Response]{Data: data, Meta: res.Meta}, nil
+	return helper.Paginate[category_model.Category, category_dto.Response](ctx, service.db.Scopes(filter), 10)
 }
 
 func (service *categoryService) Show(ctx echo.Context, filter func(tx *gorm.DB) *gorm.DB) (category_dto.Response, error) {

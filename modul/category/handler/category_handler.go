@@ -56,14 +56,34 @@ func (handler *categoryHandler) All(ctx echo.Context) error {
 	}
 
 	filter := func(tx *gorm.DB) *gorm.DB {
+
+		tx = tx.Select(`
+		categories.id,
+		categories.name,
+		categories.slug,
+		categories.is_active,
+		categories.created_at,
+		categories.updated_at,
+		categories.deleted_at,
+		COALESCE(
+			json_agg(
+				json_build_object(
+					'id', products.id,
+					'name', products.name,
+					'price', products.price
+				)
+			) FILTER (WHERE products.id IS NOT NULL),
+			'[]'
+		) as category
+	`)
+
+		tx = tx.Joins("LEFT JOIN products ON products.id = categories.id")
+
 		switch query.Status {
-
 		case "open":
-			tx = tx.Where("deleted_at IS NULL")
-
+			tx = tx.Where("categories.deleted_at IS NULL")
 		case "deleted":
-			tx = tx.Unscoped().Where("deleted_at IS NOT NULL")
-
+			tx = tx.Unscoped().Where("categories.deleted_at IS NOT NULL")
 		default:
 			tx = tx.Unscoped()
 		}
@@ -154,8 +174,31 @@ func (handler *categoryHandler) Show(ctx echo.Context) error {
 	}
 
 	filter := func(tx *gorm.DB) *gorm.DB {
-		tx.Where("id = ?", id)
-		return tx
+		tx = tx.Select(`
+		categories.id,
+		categories.name,
+		categories.slug,
+		categories.is_active,
+		categories.created_at,
+		categories.updated_at,
+		categories.deleted_at,
+		COALESCE(
+			json_agg(
+				json_build_object(
+					'id', products.id,
+					'name', products.name,
+					'price', products.price
+				)
+			) FILTER (WHERE products.id IS NOT NULL),
+			'[]'
+		) as products
+	`)
+
+		tx = tx.Joins("LEFT JOIN products ON products.category_id = categories.id")
+
+		tx = tx.Where("categories.id = ?", id)
+
+		return tx.Group("categories.id")
 	}
 
 	data, err := handler.service.Show(ctx, filter)
@@ -164,7 +207,7 @@ func (handler *categoryHandler) Show(ctx echo.Context) error {
 			return ctx.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 		}
 	}
-
+	fmt.Printf("data: %+v\n", data.Products)
 	return helper.View(ctx, "layout.html", "category/show.html", map[string]any{
 		"Title": data.Name,
 		"model": data,
