@@ -2,6 +2,7 @@ package helper
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -21,38 +22,36 @@ var ctx = context.Background()
 
 func GetCount(db *gorm.DB, rdb *redis.Client, model any) (int64, error) {
 
-	// 🔥 fallback (redis yo‘q bo‘lsa)
 	if rdb == nil {
 		var total int64
 		if err := db.Model(model).Count(&total).Error; err != nil {
 			return 0, err
 		}
+		fmt.Printf("count: %d\n", total)
 		return total, nil
 	}
 
-	// 🔥 table name olish
 	stmt := &gorm.Statement{DB: db}
-	if err := stmt.Parse(model); err != nil {
-		return 0, err
+	{
+		if err := stmt.Parse(model); err != nil {
+			return 0, err
+		}
 	}
 
 	table := stmt.Schema.Table
 	key := "count:" + table
 
-	// 🔹 Redisdan olish
 	val, err := rdb.Get(ctx, key).Result()
 	if err == nil {
 		count, _ := strconv.ParseInt(val, 10, 64)
 		return count, nil
 	}
 
-	// 🔹 DB dan olish
 	var total int64
 	if err := db.Model(model).Count(&total).Error; err != nil {
 		return 0, err
 	}
 
-	// 🔹 Redisga yozish
 	rdb.Set(ctx, key, total, time.Minute*5)
 
 	return total, nil
